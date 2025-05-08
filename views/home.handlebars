@@ -1,0 +1,12 @@
+<h1 id="appTitle">Nutrition and Workout Tracker - Login System</h1>
+<p id="siteDescription">This is a login system for the Nutrition and Workout Tracker. You can register for a new account or log in to an existing one to access your user dashboard.</p>
+
+{{!-- Conditional navigation links --}}
+{{#unless loggedIn}}
+  <a id="signuplink" href="/register">Register Here</a>
+  <a id="loginlink" href="/login">Login Here</a>
+{{/unless}}
+
+{{#if loggedIn}}
+  <a id="userlink" href="/user">User Page</a>
+{{/if}}
