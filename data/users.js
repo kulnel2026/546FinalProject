@@ -1,6 +1,6 @@
 import {users} from '../config/mongoCollections.js';
 import bcrypt from 'bcrypt';
-import {Errors} from '../helper.js';
+import {Errors} from '../helpers.js';
 const saltRounds = 16;
 
 function validateName(value, errorMsg) {

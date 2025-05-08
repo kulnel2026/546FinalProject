@@ -1,13 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{{title}}</title>
-  <link rel="stylesheet" href="/public/css/sitestyles.css" />
+  <link rel="stylesheet" href="/public/css/styles.css" />
+  <!-- keep defer on your form validator if you need it -->
   <script src="/public/js/form_validate.js" defer></script>
+  <script src="/public/js/menu.js" defer></script>
 </head>
-  <footer>
-    <p>Samhita Chunduru - 10479710</p>
+<body>
+  <nav class="site-nav">
+    <div id="hamburger" class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <ul id="nav-menu" class="nav-menu">
+      <li><a href="/">Home</a></li>
+      <li><a href="/goals">Goal Tracker</a></li>
+      <li><a href="/calendar">Calendar</a></li>
+      <li><a href="/profile">User Profile</a></li>
+      <li><a href="/stats">Statistics</a></li>
+    </ul>
+
+    {{#if loggedIn}}
+      <a href="/signout" class="login-btn">Sign Out</a>
+    {{else}}
+      <a href="/login" class="login-btn">Login</a>
+    {{/if}}
+  </nav>
+
+  {{{body}}}
+
+  <footer class="site-footer">
+    <p>Samhita Chunduru – 10479710</p>
+    <p>Arjun Dubewar</p>
+    <p>Neel Kulkarni</p>
   </footer>
+</body>
 </html>

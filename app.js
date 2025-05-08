@@ -11,8 +11,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // codebase lecture 9
-const staticDir = express.static('public');
 app.use(cookieParser());
+
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 const handlebarsInstance = exphbs.create({
      defaultLayout: 'main',
@@ -29,7 +30,6 @@ const handlebarsInstance = exphbs.create({
      }
 });
    
-app.use('/public', staticDir);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -119,6 +119,11 @@ app.use((req, res, next) => {
      next();
    });
    
+   app.use((req, res, next) => {
+    res.locals.loggedIn = Boolean(req.session.user);
+    next();
+  });
+
    // Mount routes and start server
 configRoutes(app);
    
