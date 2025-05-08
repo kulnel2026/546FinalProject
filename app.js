@@ -122,8 +122,8 @@ app.use((req, res, next) => {
    // Mount routes and start server
 configRoutes(app);
    
-app.use('*', (req, res) => {
-     res.status(404).render('error', { message: 'Route not found' });
+app.use((req, res) => {
+  res.status(404).render('error', { message: 'Route not found' });
 });
    
 app.listen(3000, () => {

@@ -1,4 +1,3 @@
-#helper.js
 export const Errors = {
     missing_fields: 'All fields must be provided',
     firstName_invalid: 'firstName must be 2–20 letters with no spaces or numbers',
