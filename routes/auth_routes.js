@@ -5,11 +5,12 @@ const router = Router();
 router.route('/').get(async (req, res) => {
   //code here for GET
   const loggedIn = Boolean(req.session.user);
-
-  res.render('main', {
-    title: 'Nutrition and Workout Tracker - Login System',
-    description: 'This is a login system for our Nutrition and Workout Tracker. Welcome! Please register or log in to continue.',
+  const role = loggedIn ? req.session.user.role:null;
+  
+  res.render('home', {
+    title: 'Macro Motion',
     loggedIn,
+    role
   });
 });
 
@@ -75,7 +76,7 @@ router
       const { userId, password } = req.body;
       const userData = await login(userId, password);
       req.session.user = userData;
-      return res.redirect('/user');
+      return res.redirect('/');
     } catch (e) {
       res.status(400).render('login', {
         title: 'Sign In',
@@ -107,10 +108,32 @@ router.route('/user').get(async (req, res) => {
     });
 });
 
-router.route('/signout').get(async (req, res) => {
-  //code here for GET
-  req.session.destroy();
-  res.render('signout', { title: 'Signed Out' });
+router.get('/profile', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect('/login');
+  }
+
+  const user = req.session.user;
+  const createdDate = new Date(user.signupDate).toLocaleDateString();
+
+  res.render('profile', {
+    title: 'User Profile',
+    username: user.userId,
+    createdDate,
+    goals: user.goals || [],
+    workouts: user.workouts || [],
+    splits: user.splits || []
+  });
+});
+
+router.route('/signout').get((req, res, next) => {
+  req.session.destroy(err => {
+    if (err) return next(err);
+    // Clear the session cookie (match the name you used in session config)
+    res.clearCookie('AuthCookie');
+    // Redirect back to your home page
+    res.redirect('/');
+  });
 });
 
 export default router;
