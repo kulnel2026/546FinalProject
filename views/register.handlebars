@@ -1,0 +1,39 @@
+<div class="login-wrapper">
+  <div class="login-box">
+    {{!-- show errors --}}
+    {{#if errors}}
+      <ul class="error-list">
+        {{#each errors}}<li>{{this}}</li>{{/each}}
+      </ul>
+    {{else if error}}
+      <p class="error-message">{{error}}</p>
+    {{/if}}
+
+    <form action="/register" method="POST">
+      <div>
+        <label for="firstName">First Name:</label>
+        <input type="text" id="firstName" name="firstName" required />
+      </div>
+      <div>
+        <label for="lastName">Last Name:</label>
+        <input type="text" id="lastName" name="lastName" required />
+      </div>
+      <div>
+        <label for="userId">User ID:</label>
+        <input type="text" id="userId" name="userId" required />
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+      <div>
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required />
+      </div>
+      <button type="submit">Register</button>
+    </form>
+
+    <p><a href="/login">Already have an account? Sign in</a></p>
+    <p><a href="/">Return Home</a></p>
+  </div>
+</div>

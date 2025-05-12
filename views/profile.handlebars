@@ -1,0 +1,48 @@
+<div class="profile-page">
+  <h2>User Profile</h2>
+  <p class="profile-created">Account created on: {{createdDate}}</p>
+
+  <section class="profile-section">
+    <h3>Username</h3>
+    <p>{{username}}</p>
+  </section>
+
+  <section class="profile-section">
+    <h3>Goals</h3>
+    {{#if goals.length}}
+      <ul>
+        {{#each goals}}<li>{{this}}</li>{{/each}}
+      </ul>
+    {{else}}
+      <p><em>No goals yet.</em></p>
+    {{/if}}
+  </section>
+
+  <section class="profile-section">
+    <h3>Workout History</h3>
+    {{#if workouts.length}}
+      <ul>
+        {{#each workouts}}
+          <li>{{this.name}} – {{this.date}}</li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p><em>No workouts logged.</em></p>
+    {{/if}}
+  </section>
+
+  <section class="profile-section">
+    <h3>Edit Workout Splits</h3>
+    {{#if splits.length}}
+      <div class="split-buttons">
+        {{#each splits}}
+          <button onclick="location.href='/profile/splits/{{@index}}/edit'">
+            {{this}}
+          </button>
+        {{/each}}
+      </div>
+    {{else}}
+      <p><em>No splits defined.</em></p>
+    {{/if}}
+  </section>
+</div>
