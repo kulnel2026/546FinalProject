@@ -20,7 +20,7 @@ router.route('/').get(async (req, res) => {
     let workoutMap = {};
     for (let entry of entries) {
       let dateStr = entry.date.toISOString().split('T')[0];
-      let workoutNames = entry.workouts.map(w => w.name);
+      let workoutNames = entry.workouts.map(w => w.group);
       if (!workoutMap[dateStr]) workoutMap[dateStr] = [];
       workoutMap[dateStr].push(...workoutNames);
     }
