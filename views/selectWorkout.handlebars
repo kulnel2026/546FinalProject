@@ -1,0 +1,25 @@
+<h2>Add Workout to {{date}}</h2>
+
+<div class="option-block">
+  <a href="/workouts/form?date={{date}}" class="form-button">➕ Create New Workout</a>
+</div>
+
+<div class="option-block">
+  <h3>Select Saved Workout</h3>
+  {{#if savedWorkouts.length}}
+    <ul>
+      {{#each savedWorkouts}}
+        <li>
+          <strong>{{this.group}}</strong> — {{this.time}}<br>
+          <form method="POST" action="/calendar/assignWorkout">
+            <input type="hidden" name="workoutId" value="{{this._id}}">
+            <input type="hidden" name="date" value="{{../date}}">
+            <button type="submit">Assign</button>
+          </form>
+        </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No saved workouts found.</p>
+  {{/if}}
+</div>
