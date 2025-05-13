@@ -281,27 +281,47 @@ page-title {
   margin-bottom: 20px;
 }
 
-.form-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-}
-
-.form-button.primary {
-  background-color: #007BFF;
-  color: white;
-}
-
-.form-button.secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
 .exercise-entry {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin-bottom: 20px;
 }
+
+/* Center everything on the page */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* Optional: for vertical centering */
+  min-height: 100vh;
+  text-align: center;
+}
+
+/* Page title styling */
+.page-title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Style the workout list */
+.workout-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Each workout item */
+.workout-item {
+  background-color: #f4f4f4;
+  margin-bottom: 10px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
