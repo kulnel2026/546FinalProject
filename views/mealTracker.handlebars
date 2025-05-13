@@ -172,64 +172,39 @@
             </tr>
           </thead>
           <tbody id="saved-meals-list">
-            {{#each savedMeals}}
-            <tr data-id="{{this._id}}">
-              <td>
-                <input
-                  class="meal-input"
-                  data-field="name"
-                  value="{{this.name}}"
-                  readonly
-                />
-              </td>
-              <td>
-                <input
-                  class="meal-input"
-                  data-field="calories"
-                  type="number"
-                  value="{{this.calories}}"
-                  readonly
-                />
-              </td>
-              <td>
-                <input
-                  class="meal-input"
-                  data-field="protein"
-                  type="number"
-                  value="{{this.protein}}"
-                  readonly
-                />
-              </td>
-              <td>
-                <input
-                  class="meal-input"
-                  data-field="carbs"
-                  type="number"
-                  value="{{this.carbs}}"
-                  readonly
-                />
-              </td>
-              <td>
-                <input
-                  class="meal-input"
-                  data-field="fat"
-                  type="number"
-                  value="{{this.fat}}"
-                  readonly
-                />
-              </td>
-              <td class="meals-table__actions">
-                <div class="inline-actions">
-                  <button type="button" class="btn btn--small btn-edit-saved">Edit</button>
-                  <button type="button" class="btn btn--small btn-save-saved">Save</button>
-                </div>
-                <form action="/meals/saved/{{this._id}}/delete" method="POST" class="btn-form">
-                  <button type="submit" class="btn btn--small btn-delete">Delete</button>
-                </form>
-              </td>
-            </tr>
-            {{/each}}
-          </tbody>
+  {{#each savedMeals}}
+  <tr data-id="{{this._id}}">
+    <td>{{this.name}}</td>
+    <td>{{this.calories}}</td>
+    <td>{{this.protein}}</td>
+    <td>{{this.carbs}}</td>
+    <td>{{this.fat}}</td>
+    <td class="meals-table__actions">
+      <!-- Add to Logged Meals button -->
+      <form action="/meals/add" method="POST" class="log-saved-form" style="display:inline;">
+        <!-- keep the view’s date in sync -->
+        <input type="hidden" name="filterDate" value="{{../selectedISODate}}" />
+        <input type="hidden" name="entryDate"  value="{{../selectedISODate}}" />
+        <!-- payload for new log entry -->
+        <input type="hidden" name="name"     value="{{this.name}}"     />
+        <input type="hidden" name="calories" value="{{this.calories}}" />
+        <input type="hidden" name="protein"  value="{{this.protein}}"  />
+        <input type="hidden" name="carbs"    value="{{this.carbs}}"    />
+        <input type="hidden" name="fat"      value="{{this.fat}}"      />
+        <button type="submit" class="btn btn--small btn--primary">
+          + Add
+        </button>
+      </form>
+
+      <!-- existing Edit / Delete buttons… -->
+      <button type="button" class="btn btn--small btn-edit-saved">Edit</button>
+      <form action="/meals/saved/{{this._id}}/delete" method="POST" style="display:inline;">
+        <button type="submit" class="btn btn--small btn-delete">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {{/each}}
+</tbody>
         </table>
       </section>
     </div>
