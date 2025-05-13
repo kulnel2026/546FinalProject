@@ -24,4 +24,18 @@
     top: 5px;
     left: 5px;
   }
+
+.add-workout-btn {
+    margin-top: 0.5rem;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    background-color: #6aa84f;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
   
+  .add-workout-btn:hover {
+    background-color: #4f8a36;
+  }
