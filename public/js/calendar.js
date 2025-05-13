@@ -46,6 +46,18 @@ function generateCalendar() {
     dayNum.textContent = day;
     cell.appendChild(dayNum);
     calendarEl.appendChild(cell);
+    const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+    // Add Workout Button
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-workout-btn';
+    addBtn.textContent = '➕ Add Workout';
+    addBtn.onclick = () => {
+    // Redirect to the add-workout modal/page and pass the date
+        window.location.href = `/calendar/selectWorkout?date=${formattedDate}`;
+    };
+    cell.appendChild(addBtn);
+    calendarEl.appendChild(cell);
   }
 }
 
