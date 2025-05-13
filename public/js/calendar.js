@@ -48,6 +48,18 @@ function generateCalendar() {
     calendarEl.appendChild(cell);
     const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
+    //Add workout names if present
+    if (workoutMap && workoutMap[formattedDate]) {
+      const list = document.createElement('ul');
+      list.className = 'workout-list';
+      for (const workoutName of workoutMap[formattedDate]) {
+        const li = document.createElement('li');
+        li.textContent = workoutName;
+        list.appendChild(li);
+      }
+      cell.appendChild(list);
+    }
+
     // Add Workout Button
     const addBtn = document.createElement('button');
     addBtn.className = 'add-workout-btn';
