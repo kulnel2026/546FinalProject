@@ -54,12 +54,13 @@ app.use((req, res, next) => {
 });
 
 function blockAuth(req, res, next) {
-     if (req.session.user) {
-       return res.redirect(
-         req.session.user.role === '/user');
-     }
-     next();
+  if (req.session.user) {
+    // redirect *to* /user (or whatever page you want)
+    return res.redirect('/user');
+  }
+  next();
 }
+
 app.use('/login', blockAuth);
 app.use('/register', blockAuth);
 

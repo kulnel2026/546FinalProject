@@ -18,5 +18,6 @@ const getCollectionFn = (collection) => {
 /* Core collections needed for workout tracker */
 export const users = getCollectionFn('users');
 export const meals = getCollectionFn('meals');
+export const savedMeals = getCollectionFn('savedMeals');
 export const workouts = getCollectionFn('workouts');
 export const calendarEntries = getCollectionFn('calendarEntries');
