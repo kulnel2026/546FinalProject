@@ -44,8 +44,11 @@ router.get('/', requireLogin, async (req, res) => {
     });
 
     // 3) fetch saved meals unchanged
-    const savedMeals = await getSavedMeals(userId);
-
+    let savedMeals = await getSavedMeals(userId);
+    savedMeals = savedMeals.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    );
+    
     // 4) compute totals for just this day
     const dailyTotals = meals.reduce((acc, m) => {
       acc.calories += Number(m.calories) || 0;
