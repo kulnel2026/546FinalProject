@@ -20,9 +20,9 @@ export const createWorkout = async (username, group, time, exercises) => {
   return await workoutCollection.findOne({ _id: insertInfo.insertedId });
 };
 
-export const getAllWorkouts = async () => {
+export const getAllWorkouts = async (username) => {
   const workoutCollection = await workouts();
-  return await workoutCollection.find({}).toArray();
+  return await workoutCollection.find({username}).toArray();
 };
 
 export const getWorkoutById = async (id) => {

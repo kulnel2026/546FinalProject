@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="/css/styles.css">
+
 <div class="page-container">
   <h1 class="page-title">{{#if isEdit}}Edit{{else}}Add{{/if}} Workout</h1>
 
@@ -13,8 +14,34 @@
 
     <input class="input-field" type="text" name="time" placeholder="e.g. 1h 15min" value="{{#if isEdit}}{{workout.time}}{{/if}}" required>
 
-    <textarea class="textarea-field" name="exercises" required placeholder='[{"name":"Bench Press","sets":4,"reps":10,"weight":135}]'>{{#if isEdit}}{{{json workout.exercises}}}{{/if}}</textarea>
+    <div id="exercise-fields">
+        {{#if isEdit}}
+            {{#each workout.exercises}}
+            <div class="exercise-entry">
+                <input class="input-field" type="text" name="exerciseName" placeholder="Exercise Name" value="{{this.name}}" required>
+                <input class="input-field" type="number" name="exerciseSets" placeholder="Sets" value="{{this.sets}}" required>
+                <input class="input-field" type="number" name="exerciseReps" placeholder="Reps" value="{{this.reps}}" required>
+                <input class="input-field" type="number" name="exerciseWeight" placeholder="Weight (lbs)" value="{{this.weight}}" required>
+            </div>
+            {{/each}}
+        {{else}}
+            <div class="exercise-entry">
+            <input class="input-field" type="text" name="exerciseName" placeholder="Exercise Name" required>
+            <input class="input-field" type="number" name="exerciseSets" placeholder="Sets" required>
+            <input class="input-field" type="number" name="exerciseReps" placeholder="Reps" required>
+            <input class="input-field" type="number" name="exerciseWeight" placeholder="Weight (lbs)" required>
+            </div>
+        {{/if}}
+
+
+    </div>
+
+    <button type="button" id="add-exercise-btn" class="form-button">➕ Add Another Exercise</button>
+
+
 
     <button class="form-button" type="submit">Save Workout</button>
   </form>
 </div>
+
+<script src="../public/js/exercise.js"></script>

@@ -4,13 +4,15 @@ import { createWorkout, getAllWorkouts, getWorkoutById, deleteWorkoutById, updat
 const router = Router();
 
 router.get('/', async (req, res) => {
-  const all = await getAllWorkouts();
+  const username = req.session.user.userId;
+  const all = await getAllWorkouts(username);
   res.render('workoutDashboard', { workouts: all });
 });
 
 router.get('/list', async (req, res) => {
   try {
-    const workouts = await getAllWorkouts();
+    const username = req.session.user.userId;
+    const workouts = await getAllWorkouts(username);
     const isDelete = req.query.action === 'delete';
     res.render('workoutList', { workouts, isDelete });
   } catch (e) {
@@ -57,9 +59,24 @@ router.post('/add', async (req, res) => {
 router.post('/edit/:id', async (req, res) => {
   try {
     const username = req.session.user.userId;
-    const { group, time, exercises } = req.body;
+
+    const { exerciseName, exerciseSets, exerciseReps, exerciseWeight, group, time } = req.body;
+
+    const exercises = Array.isArray(exerciseName) ? exerciseName.map((name, i) => ({
+      name,
+      sets: Number(exerciseSets[i]),
+      reps: Number(exerciseReps[i]),
+      weight: Number(exerciseWeight[i])
+    })) : [{
+      name: exerciseName,
+      sets: Number(exerciseSets),
+      reps: Number(exerciseReps),
+      weight: Number(exerciseWeight)
+    }];
+
+
     const parsedExercises = JSON.parse(exercises);
-    await updateWorkout(req.params.id, { username, group, time, exercises: parsedExercises });
+    await updateWorkout(req.params.id, { username, group, time, exercises: exercises });
     res.redirect('/workouts');
   } catch (e) {
     res.status(400).send(e);
