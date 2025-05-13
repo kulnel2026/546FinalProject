@@ -1,6 +1,19 @@
-<h2>All Workouts</h2>
-<ul>
-  {{#each workouts}}
-    <li><strong>{{username}}</strong> - {{group}} - {{time}}</li>
-  {{/each}}
-</ul>
+<link rel="stylesheet" href="/css/styles.css">
+<div class="page-container">
+  <h1 class="page-title">{{#if isDelete}}Remove{{else}}Edit{{/if}} Workout</h1>
+
+  <ul class="workout-list">
+    {{#each workouts}}
+      <li class="workout-item">
+        <span>{{this.name}} - {{this.group}}</span>
+        {{#if ../isDelete}}
+          <form method="POST" action="/workouts/delete/{{this._id}}" style="display:inline;">
+            <button class="form-button" type="submit">❌ Remove</button>
+          </form>
+        {{else}}
+          <a href="/workouts/form/{{this._id}}" class="form-button">📝 Edit</a>
+        {{/if}}
+      </li>
+    {{/each}}
+  </ul>
+</div>

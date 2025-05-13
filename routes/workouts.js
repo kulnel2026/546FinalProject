@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createWorkout, getAllWorkouts, getWorkoutById } from '../data/workouts.js';
+import { createWorkout, getAllWorkouts, getWorkoutById, deleteWorkoutById, updateWorkout } from '../data/workouts.js';
 
 const router = Router();
 
@@ -9,7 +9,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/form', async (req, res) => {
-  res.render('workoutForm');
+  res.render('workoutForm', {isEdit: false});
 });
 
 router.post('/add', async (req, res) => {

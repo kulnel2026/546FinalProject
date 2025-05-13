@@ -30,3 +30,33 @@ export const getWorkoutById = async (id) => {
   const workoutCollection = await workouts();
   return await workoutCollection.findOne({ _id: new ObjectId(id) });
 };
+
+export const deleteWorkoutById = async (id) => {
+  if (!id) throw 'Workout ID required';
+  const workoutCollection = await workouts();
+  const deletionInfo = await workoutCollection.deleteOne({ _id: new ObjectId(id) });
+  if (deletionInfo.deletedCount === 0) throw 'Workout could not be deleted';
+  return true;
+};
+
+export const updateWorkout = async (id, updatedFields) => {
+  if (!id) throw 'Workout ID required';
+  const workoutCollection = await workouts();
+
+  const updateData = {};
+  if (updatedFields.username) updateData.username = updatedFields.username;
+  if (updatedFields.group) updateData.group = updatedFields.group;
+  if (updatedFields.time) updateData.time = updatedFields.time;
+  if (Array.isArray(updatedFields.exercises)) updateData.exercises = updatedFields.exercises;
+
+  const updateInfo = await workoutCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: updateData }
+  );
+
+  if (updateInfo.modifiedCount === 0) throw 'Workout update failed';
+
+  return await getWorkoutById(id);
+
+
+};

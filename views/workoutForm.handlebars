@@ -1,27 +1,20 @@
-<!-- views/workoutForm.handlebars -->
 <link rel="stylesheet" href="/css/styles.css">
 <div class="page-container">
-  <h1 class="page-title">Add/Edit Workout</h1>
+  <h1 class="page-title">{{#if isEdit}}Edit{{else}}Add{{/if}} Workout</h1>
 
-  <form class="workout-form" method="POST" action="/workouts/add">
-    <input class="input-field" type="text" name="username" placeholder="Name" required>
+  <form class="workout-form" method="POST" action="{{#if isEdit}}/workouts/update/{{workout._id}}{{else}}/workouts/add{{/if}}">
+    <input class="input-field" type="text" name="username" placeholder="Name" value="{{workout.username}}" required>
 
-    <select class="dropdown-field" name="group">
+    <select class="dropdown-field" name="group" required>
       <option value="">Muscle Group</option>
-      <option>Chest</option>
-      <option>Back</option>
-      <option>Push</option>
-      <option>Pull</option>
-      <option>Legs</option>
-      <option>Abs</option>
-      <option>Upper</option>
-      <option>Lower</option>
-      <option>Full</option>
+      {{#each groups}}
+        <option value="{{this}}" {{#if (eq ../workout.group this)}}selected{{/if}}>{{this}}</option>
+      {{/each}}
     </select>
 
-    <input class="input-field" type="text" name="time" placeholder="e.g. 1h 15min" required>
+    <input class="input-field" type="text" name="time" placeholder="e.g. 1h 15min" value="{{workout.time}}" required>
 
-    <textarea class="textarea-field" name="exercises" placeholder='[{"name":"Bench Press","sets":4,"reps":10,"weight":135}]' required></textarea>
+    <textarea class="textarea-field" name="exercises" required placeholder='[{"name":"Bench Press","sets":4,"reps":10,"weight":135}]'>{{workout.exercises}}</textarea>
 
     <button class="form-button" type="submit">Save Workout</button>
   </form>
