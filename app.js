@@ -6,6 +6,7 @@ import exphbs from 'express-handlebars';
 import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import Handlebars from 'handlebars';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +29,10 @@ const handlebarsInstance = exphbs.create({
    
        partialsDir: ['views/partials/']
      }
+});
+
+Handlebars.registerHelper('eq', function (a, b) {
+  return a === b;
 });
    
 app.use(express.json());

@@ -5,7 +5,7 @@
   <ul class="workout-list">
     {{#each workouts}}
       <li class="workout-item">
-        <span>{{this.name}} - {{this.group}}</span>
+        <span>{{this.username}} - {{this.group}}</span>
         {{#if ../isDelete}}
           <form method="POST" action="/workouts/delete/{{this._id}}" style="display:inline;">
             <button class="form-button" type="submit">❌ Remove</button>

@@ -8,15 +8,34 @@ router.get('/', async (req, res) => {
   res.render('workoutDashboard', { workouts: all });
 });
 
+router.get('/list', async (req, res) => {
+  try {
+    const workouts = await getAllWorkouts();
+    const isDelete = req.query.action === 'delete';
+    res.render('workoutList', { workouts, isDelete });
+  } catch (e) {
+    res.status(500).send(e);
+  }
+});
+
 router.get('/form', async (req, res) => {
-  res.render('workoutForm', {isEdit: false});
+
+  const muscleGroups = [
+    'Push', 'Pull', 'Legs', 'Chest', 'Triceps', 'Shoulders', 'Upper Back', 'Lats', 'Biceps', 'Forearms', 'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Core', 'Cardio'
+  ];
+
+  res.render('workoutForm', {isEdit: false, groups: muscleGroups});
 });
 
 router.get('/edit/:id', async (req, res) => {
   try {
     const workout = await getWorkoutById(req.params.id);
     if (!workout) return res.status(404).send('Workout not found');
-    res.render('workoutForm', { workout, isEdit: true });
+
+    const muscleGroups = [
+      'Push', 'Pull', 'Legs', 'Chest', 'Triceps', 'Shoulders', 'Upper Back', 'Lats', 'Biceps', 'Forearms', 'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Core', 'Cardio'
+    ];
+    res.render('workoutForm', { workout, isEdit: true, groups: muscleGroups});
   } catch (e) {
     res.status(500).send(e);
   }
