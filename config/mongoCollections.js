@@ -20,3 +20,4 @@ export const users = getCollectionFn('users');
 export const meals = getCollectionFn('meals');
 export const workouts = getCollectionFn('workouts');
 export const calendarEntries = getCollectionFn('calendarEntries');
+export const savedMeals = getCollectionFn('savedMeals');
