@@ -1,19 +1,15 @@
-
 <main class="meal-tracker">
   <section class="daily-totals">
     <h1>Daily Meal Tracker</h1>
     <div class="totals-bar">
-      <span class="totals-bar__date">Date: {{currentDate}}</span>
-      </span>
+      <!-- date-picker; value should be YYYY-MM-DD for HTML date inputs -->
+      <input
+        type="date"
+        id="date-picker"
+        value="{{selectedISODate}}"
+      />
     </div>
-    {{#if saveError}}
-      <script>
-        alert("{{saveError}}")
-      </script>
-    {{/if}} 
-    
   </section>
-  
 
   <div class="meals-container">
     <!-- LEFT COLUMN -->
@@ -28,73 +24,73 @@
             </tr>
           </thead>
           <tbody>
-  {{#each meals}}
-  <tr data-id="{{this._id}}">
-    <!-- Name -->
-    <td>
-      <input 
-        class="meal-input" 
-        data-field="name" 
-        value="{{this.name}}" 
-        readonly 
-      />
-    </td>
-    <!-- Calories -->
-    <td>
-      <input 
-        class="meal-input" 
-        data-field="calories" 
-        type="number" 
-        value="{{this.calories}}" 
-        readonly 
-      />
-    </td>
-    <!-- Protein -->
-    <td>
-      <input 
-        class="meal-input" 
-        data-field="protein" 
-        type="number" 
-        value="{{this.protein}}" 
-        readonly 
-      />
-    </td>
-    <!-- Carbs -->
-    <td>
-      <input 
-        class="meal-input" 
-        data-field="carbs" 
-        type="number" 
-        value="{{this.carbs}}" 
-        readonly 
-      />
-    </td>
-    <!-- Fats -->
-    <td>
-      <input 
-        class="meal-input" 
-        data-field="fat" 
-        type="number" 
-        value="{{this.fat}}" 
-        readonly 
-      />
-    </td>
-    <!-- Actions -->
-    <td class="meals-table__actions">
-      <div class="inline-actions"></div>
-        <button type="button" class="btn btn--small btn-edit">Edit</button>
-        <button type="button" class="btn btn--small btn-save">Save</button>
-      </div>
-      <form action="/meals/{{this._id}}/save" method="POST">
-        <button class="btn btn--small btn--secondary">Save Meal</button>
-      </form>
-      <form action="/meals/{{this._id}}/delete" method="POST">
-        <button type="submit" class="btn btn--small btn-delete">Delete</button>
-      </form>
-    </td>
-  </tr>
-  {{/each}}
-</tbody>
+            {{#each meals}}
+            <tr data-id="{{this._id}}">
+              <!-- Name -->
+              <td>
+                <input 
+                  class="meal-input" 
+                  data-field="name" 
+                  value="{{this.name}}" 
+                  readonly 
+                />
+              </td>
+              <!-- Calories -->
+              <td>
+                <input 
+                  class="meal-input" 
+                  data-field="calories" 
+                  type="number" 
+                  value="{{this.calories}}" 
+                  readonly 
+                />
+              </td>
+              <!-- Protein -->
+              <td>
+                <input 
+                  class="meal-input" 
+                  data-field="protein" 
+                  type="number" 
+                  value="{{this.protein}}" 
+                  readonly 
+                />
+              </td>
+              <!-- Carbs -->
+              <td>
+                <input 
+                  class="meal-input" 
+                  data-field="carbs" 
+                  type="number" 
+                  value="{{this.carbs}}" 
+                  readonly 
+                />
+              </td>
+              <!-- Fats -->
+              <td>
+                <input 
+                  class="meal-input" 
+                  data-field="fat" 
+                  type="number" 
+                  value="{{this.fat}}" 
+                  readonly 
+                />
+              </td>
+              <!-- Actions -->
+              <td class="meals-table__actions">
+                <div class="inline-actions">
+                  <button type="button" class="btn btn--small btn-edit">Edit</button>
+                  <button type="button" class="btn btn--small btn-save">Save</button>
+                </div>
+                <form action="/meals/{{this._id}}/save" method="POST">
+                  <button class="btn btn--small btn--secondary">Save Meal</button>
+                </form>
+                <form action="/meals/{{this._id}}/delete" method="POST">
+                  <button type="submit" class="btn btn--small btn-delete">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
           <tfoot>
             <tr>
               <td><strong>Totals</strong></td>
@@ -111,6 +107,9 @@
       <section id="add-meal-form">
         <h2>Add Meal</h2>
         <form action="/meals/add" method="POST" class="add-meal-form">
+          <input type="hidden" name="filterDate" value="{{selectedISODate}}" />
+          <input type="hidden" name="entryDate"  value="{{selectedISODate}}" />
+
           <label>
             Name:
             <input type="text" name="name" required />
@@ -137,104 +136,104 @@
     </div>
 
     <!-- RIGHT COLUMN -->
-<div class="column column--saved">
-  <section id="saved-meals">
-    <h2>Saved Meals</h2>
+    <div class="column column--saved">
+      <section id="saved-meals">
+        <h2>Saved Meals</h2>
 
-    <!-- Add New Template -->
-    <form action="/meals/saved" method="POST" class="add-saved-form">
-      <table class="meals-table">
-        <thead>
-          <tr>
-            <th>Name</th><th>Cal</th><th>Prot</th><th>Carb</th><th>Fat</th><th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="add-row-saved">
-            <td><input name="name"     placeholder="Name"     required></td>
-            <td><input name="calories" type="number" placeholder="Cal"  required></td>
-            <td><input name="protein"  type="number" placeholder="Prot"></td>
-            <td><input name="carbs"    type="number" placeholder="Carb"></td>
-            <td><input name="fat"      type="number" placeholder="Fat"></td>
-            <td>
-              <button class="btn btn--small btn--primary" type="submit">Add</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </form>
+        <!-- Add New Template -->
+        <form action="/meals/saved" method="POST" class="add-saved-form">
+          <table class="meals-table">
+            <thead>
+              <tr>
+                <th>Name</th><th>Cal</th><th>Prot</th><th>Carb</th><th>Fat</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="add-row-saved">
+                <td><input name="name"     placeholder="Name"     required></td>
+                <td><input name="calories" type="number" placeholder="Cal"  required></td>
+                <td><input name="protein"  type="number" placeholder="Prot"></td>
+                <td><input name="carbs"    type="number" placeholder="Carb"></td>
+                <td><input name="fat"      type="number" placeholder="Fat"></td>
+                <td>
+                  <button class="btn btn--small btn--primary" type="submit">Add</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </form>
 
-    <!-- Existing Saved Templates -->
-    <table class="meals-table">
-      <thead>
-        <tr>
-          <th>Name</th><th>Calories</th><th>Protein</th>
-          <th>Carbs</th><th>Fats</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="saved-meals-list">
-        {{#each savedMeals}}
-        <tr data-id="{{this._id}}">
-          <td>
-            <input
-              class="meal-input"
-              data-field="name"
-              value="{{this.name}}"
-              readonly
-            />
-          </td>
-          <td>
-            <input
-              class="meal-input"
-              data-field="calories"
-              type="number"
-              value="{{this.calories}}"
-              readonly
-            />
-          </td>
-          <td>
-            <input
-              class="meal-input"
-              data-field="protein"
-              type="number"
-              value="{{this.protein}}"
-              readonly
-            />
-          </td>
-          <td>
-            <input
-              class="meal-input"
-              data-field="carbs"
-              type="number"
-              value="{{this.carbs}}"
-              readonly
-            />
-          </td>
-          <td>
-            <input
-              class="meal-input"
-              data-field="fat"
-              type="number"
-              value="{{this.fat}}"
-              readonly
-            />
-          </td>
-          <td class="meals-table__actions">
-            <div class="inline-actions">
-              <button type="button" class="btn btn--small btn-edit-saved">Edit</button>
-              <button type="button" class="btn btn--small btn-save-saved">Save</button>
-            </div>
-            <form action="/meals/saved/{{this._id}}/delete" method="POST" class="btn-form">
-              <button type="submit" class="btn btn--small btn-delete">Delete</button>
-            </form>
-          </td>
-        </tr>
-        {{/each}}
-      </tbody>
-    </table>
-  </section>
-</div>
+        <!-- Existing Saved Templates -->
+        <table class="meals-table">
+          <thead>
+            <tr>
+              <th>Name</th><th>Calories</th><th>Protein</th>
+              <th>Carbs</th><th>Fats</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="saved-meals-list">
+            {{#each savedMeals}}
+            <tr data-id="{{this._id}}">
+              <td>
+                <input
+                  class="meal-input"
+                  data-field="name"
+                  value="{{this.name}}"
+                  readonly
+                />
+              </td>
+              <td>
+                <input
+                  class="meal-input"
+                  data-field="calories"
+                  type="number"
+                  value="{{this.calories}}"
+                  readonly
+                />
+              </td>
+              <td>
+                <input
+                  class="meal-input"
+                  data-field="protein"
+                  type="number"
+                  value="{{this.protein}}"
+                  readonly
+                />
+              </td>
+              <td>
+                <input
+                  class="meal-input"
+                  data-field="carbs"
+                  type="number"
+                  value="{{this.carbs}}"
+                  readonly
+                />
+              </td>
+              <td>
+                <input
+                  class="meal-input"
+                  data-field="fat"
+                  type="number"
+                  value="{{this.fat}}"
+                  readonly
+                />
+              </td>
+              <td class="meals-table__actions">
+                <div class="inline-actions">
+                  <button type="button" class="btn btn--small btn-edit-saved">Edit</button>
+                  <button type="button" class="btn btn--small btn-save-saved">Save</button>
+                </div>
+                <form action="/meals/saved/{{this._id}}/delete" method="POST" class="btn-form">
+                  <button type="submit" class="btn btn--small btn-delete">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </div>
 </main>
+
 <script src="/js/meal-edit.js" defer></script>
-
-
