@@ -32,11 +32,11 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #c6e2a2; /* light green */
+  min-height: 100vh;
+  background: #c6e2a2;
   font-family: sans-serif;
+  overflow-x: hidden;
+  overflow-y: auto; 
 }
 
 /* NAVBAR */
@@ -210,7 +210,7 @@ html, body {
 
 /* FOOTER */
 .site-footer {
-  position: fixed;
+  position: relative;
   bottom: 0;
   left: 0; right: 0;
   padding: 0.5rem 1rem;         /* give it some breathing room */
