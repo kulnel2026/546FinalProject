@@ -13,9 +13,22 @@ router.route('/').get(async (req, res) => {
       });
     }
 
+    let userId = req.session.user.userId;
+    let entries = await getEntriesByUser(userId);
+
+    // Format to map like: { '2025-05-13': ['Running', 'Swimming'], ... }
+    let workoutMap = {};
+    for (let entry of entries) {
+      let dateStr = entry.date.toISOString().split('T')[0];
+      let workoutNames = entry.workouts.map(w => w.name);
+      if (!workoutMap[dateStr]) workoutMap[dateStr] = [];
+      workoutMap[dateStr].push(...workoutNames);
+    }
+
     res.render('calendar', {
       title: 'Your Calendar',
-      loggedIn: true
+      loggedIn: true,
+      workoutMap: workoutMap
     });
   } catch (e) {
     res.status(500).render('error', {
