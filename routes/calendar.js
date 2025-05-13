@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import {getAllWorkouts, getWorkoutById} from '../data/workouts.js';
-import { createEntry } from '../data/calendarEntries.js';
+import { createEntry, getEntriesByUser} from '../data/calendarEntries.js';
 
 const router = Router();
 
@@ -103,7 +103,8 @@ router.post('/assignWorkout', async (req, res) => {
       name: String(ex.name).trim(),
       sets: String(ex.sets).trim(),
       reps: String(ex.reps).trim(),
-      weight: String(ex.weight).trim()
+      weight: String(ex.weight).trim(),
+      group: workout.group?.trim()
     }));
 
     // Add workout to calendar entry (meals = [])
@@ -117,6 +118,7 @@ router.post('/assignWorkout', async (req, res) => {
     });
   }
 });
+
 
 
 export default router;
