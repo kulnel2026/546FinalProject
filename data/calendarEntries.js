@@ -36,7 +36,8 @@ export const createEntry = async (userId, date, workouts = [], meals = []) => {
         name: w.name.trim(),
         sets: w.sets.trim(),
         reps: w.reps.trim(),
-        weight: w.weight.trim()
+        weight: w.weight.trim(),
+        group: w.group.trim()
       });
     }
   }
@@ -69,19 +70,56 @@ export const createEntry = async (userId, date, workouts = [], meals = []) => {
     throw "Error: Entry must include at least one workout or meal";
   }
 
-  const newEntry = {
-    userId: userId,
-    date: inputDate,
-    workouts: formattedWorkouts,
-    meals: formattedMeals
-  };
-
   const calendarCollection = await calendarEntries();
-  const insertResult = await calendarCollection.insertOne(newEntry);
-  if (!insertResult.acknowledged) {
-    throw "Error: Failed to insert calendar entry";
-  }
+  let existingEntry = await calendarCollection.findOne({
+    userId: userId,
+    date: inputDate
+  });
 
-  newEntry._id = insertResult.insertedId;
-  return newEntry;
+  if (existingEntry) {
+    // Append new workouts or meals to existing entry
+    let updatedWorkouts = [...(existingEntry.workouts || []), ...formattedWorkouts];
+    let updatedMeals = [...(existingEntry.meals || []), ...formattedMeals];
+
+    let updateResult = await calendarCollection.updateOne(
+        { _id: existingEntry._id },
+        { $set: { workouts: updatedWorkouts, meals: updatedMeals } });
+
+        if (updateResult.modifiedCount === 0) {
+            throw "Error: Failed to update existing calendar entry";
+          }
+        
+          return await calendarCollection.findOne({ _id: existingEntry._id });
+    }else{
+        const newEntry = {
+            userId: userId,
+            date: inputDate,
+            workouts: formattedWorkouts,
+            meals: formattedMeals
+        };
+
+        const insertResult = await calendarCollection.insertOne(newEntry);
+        if (!insertResult.acknowledged) {
+            throw "Error: Failed to insert calendar entry";
+        }
+
+        newEntry._id = insertResult.insertedId;
+        return newEntry;
+    }
+    
 };
+
+export const getEntriesByUser = async (userId) => {
+    if (!userId || typeof userId !== 'string') {
+      throw "Error: userId must be a non-empty string";
+    }
+  
+    const calendarCollection = await calendarEntries();
+  
+    const entries = await calendarCollection
+      .find({ userId }) // assumes userId is stored as a string
+      .sort({ date: 1 }) // sort from earliest to latest
+      .toArray();
+  
+    return entries;
+  };
