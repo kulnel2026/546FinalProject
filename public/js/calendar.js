@@ -45,7 +45,7 @@ function generateCalendar() {
     dayNum.className = 'day-number';
     dayNum.textContent = day;
     cell.appendChild(dayNum);
-    
+
     const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
     //Add workout names if present
@@ -67,9 +67,11 @@ function generateCalendar() {
     addBtn.onclick = () => {
     // Redirect to the add-workout modal/page and pass the date
         window.location.href = `/calendar/selectWorkout?date=${formattedDate}`;
-    };
+  };
+
     cell.appendChild(addBtn);
     calendarEl.appendChild(cell);
+
   }
 }
 
