@@ -43,7 +43,9 @@ router.get('/edit/:id', async (req, res) => {
 
 router.post('/add', async (req, res) => {
   try {
-    const { username, group, time, exercises } = req.body;
+    const username = req.session.user.userId;
+    console.log(req.body)
+    const { group, time, exercises } = req.body;
     const parsedExercises = JSON.parse(exercises); // expects array of exercise objects
     await createWorkout(username, group, time, parsedExercises);
     res.redirect('/workouts');
@@ -54,7 +56,8 @@ router.post('/add', async (req, res) => {
 
 router.post('/edit/:id', async (req, res) => {
   try {
-    const { username, group, time, exercises } = req.body;
+    const username = req.session.user.userId;
+    const { group, time, exercises } = req.body;
     const parsedExercises = JSON.parse(exercises);
     await updateWorkout(req.params.id, { username, group, time, exercises: parsedExercises });
     res.redirect('/workouts');

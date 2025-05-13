@@ -7,6 +7,7 @@ import session from 'express-session';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Handlebars from 'handlebars';
+import workoutRoutes from './routes/workouts.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,6 +78,8 @@ function requireAuth(req, res, next) {
      next();
 }
 app.use('/user', requireAuth);
+
+app.use('/workouts', requireAuth, workoutRoutes);
 
 function requireSignout(req, res, next) {
      if (!req.session.user) return res.redirect('/login');

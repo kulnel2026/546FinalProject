@@ -3,7 +3,6 @@
   <h1 class="page-title">{{#if isEdit}}Edit{{else}}Add{{/if}} Workout</h1>
 
   <form class="workout-form" method="POST" action="{{#if isEdit}}/workouts/edit/{{workout._id}}{{else}}/workouts/add{{/if}}">
-    <input class="input-field" type="text" name="username" placeholder="Name" value="{{#if isEdit}}{{workout.username}}{{/if}}" required>
 
     <select class="dropdown-field" name="group" required>
       <option value="">Muscle Group</option>
