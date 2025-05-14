@@ -1,4 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const datePicker = document.getElementById('date-picker');
+  if (datePicker) {
+    datePicker.addEventListener('change', e => {
+      window.location.href = `/meals?date=${e.target.value}`;
+    });
+  }
+  
   const loggedTbody = document.querySelector('.meals-table tbody');
   const loggedTfoot = document.querySelector('.meals-table tfoot tr');
   const savedTbody  = document.querySelector('#saved-meals-list');

@@ -1,4 +1,3 @@
-// routes/mealTrackerRoutes.js
 import { Router } from 'express';
 import {
   getMealsByUser,
@@ -32,10 +31,25 @@ function extractUserId(sessionUser) {
 // GET /meals → render tracker
 router.get('/', requireLogin, async (req, res) => {
   try {
-    const userId     = extractUserId(req.session.user);
-    const meals      = await getMealsByUser(userId);
-    const savedMeals = await getSavedMeals(userId);
+    const userId = extractUserId(req.session.user);
 
+    // 1) figure out which ISO date to show (YYYY‑MM‑DD)
+    const isoDate = req.query.date || new Date().toISOString().slice(0,10);
+
+    // 2) fetch all meals and filter to that day
+    const allMeals = await getMealsByUser(userId);
+    const meals = allMeals.filter(m => {
+      const mIso = new Date(m.date).toISOString().slice(0,10);
+      return mIso === isoDate;
+    });
+
+    // 3) fetch saved meals unchanged
+    let savedMeals = await getSavedMeals(userId);
+    savedMeals = savedMeals.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    );
+    
+    // 4) compute totals for just this day
     const dailyTotals = meals.reduce((acc, m) => {
       acc.calories += Number(m.calories) || 0;
       acc.protein  += Number(m.protein)  || 0;
@@ -44,23 +58,27 @@ router.get('/', requireLogin, async (req, res) => {
       return acc;
     }, { calories:0, protein:0, carbs:0, fats:0 });
 
+    // 5) render with both ISO and pretty dates
     res.render('mealTracker', {
-      title:        'Meal Tracker',
-      loggedIn:     true,
-      meals,
-      savedMeals,
-      currentDate:  new Date().toLocaleDateString(),
+      title:             'Meal Tracker',
+      loggedIn:          true,
+      meals,             // filtered by date
+      savedMeals,        // all saved templates
+      selectedISODate:   isoDate,            // for <input type="date">
       dailyTotals
     });
+
   } catch (e) {
+    // note: isoDate may be undefined here, so recalc
+    const isoDate = req.query.date || new Date().toISOString().slice(0,10);
     res.status(500).render('mealTracker', {
-      title:        'Meal Tracker',
-      loggedIn:     true,
-      meals:        [],
-      savedMeals:   [],
-      currentDate:  new Date().toLocaleDateString(),
-      dailyTotals:  { calories:0, protein:0, carbs:0, fats:0 },
-      error:        e.message
+      title:             'Meal Tracker',
+      loggedIn:          true,
+      meals:             [],
+      savedMeals:        [],
+      selectedISODate:   isoDate,
+      dailyTotals:       { calories:0, protein:0, carbs:0, fats:0 },
+      error:             e.message
     });
   }
 });
@@ -69,12 +87,39 @@ router.get('/', requireLogin, async (req, res) => {
 router.post('/add', requireLogin, async (req, res) => {
   try {
     const userId = extractUserId(req.session.user);
-    req.body.date = new Date().toISOString();
-    await addMeal(userId, req.body);
-    return res.redirect('/meals');
+
+    // 1) determine current view-date
+    const isoDate   = req.body.filterDate
+                    || req.query.date
+                    || new Date().toISOString().slice(0,10);
+
+    // 2) determine which date to stamp on the new meal
+    const entryDate = req.body.entryDate || isoDate;
+
+    // 3) build and add the meal
+    const mealData = {
+      name:     req.body.name,
+      date:     entryDate,
+      calories: Number(req.body.calories),
+      protein:  Number(req.body.protein),
+      carbs:    Number(req.body.carbs),
+      fat:      Number(req.body.fat)
+    };
+    await addMeal(userId, mealData);
+
+    // 4) redirect back to the same date view
+    return res.redirect(`/meals?date=${isoDate}`);
+
   } catch (e) {
+    // on error, re‑fetch for that same date and re‑render
     const userId     = extractUserId(req.session.user);
-    const meals      = await getMealsByUser(userId);
+    const isoDate    = req.body.filterDate
+                     || req.query.date
+                     || new Date().toISOString().slice(0,10);
+    const allMeals   = await getMealsByUser(userId);
+    const meals      = allMeals.filter(m =>
+      new Date(m.date).toISOString().slice(0,10) === isoDate
+    );
     const savedMeals = await getSavedMeals(userId);
     const dailyTotals = meals.reduce((acc, m) => {
       acc.calories += Number(m.calories) || 0;
@@ -84,14 +129,14 @@ router.post('/add', requireLogin, async (req, res) => {
       return acc;
     }, { calories:0, protein:0, carbs:0, fats:0 });
 
-    res.status(400).render('mealTracker', {
-      title:        'Meal Tracker',
-      loggedIn:     true,
+    return res.status(400).render('mealTracker', {
+      title:           'Meal Tracker',
+      loggedIn:        true,
       meals,
       savedMeals,
-      currentDate:  new Date().toLocaleDateString(),
+      selectedISODate: isoDate,
       dailyTotals,
-      error:        e.message
+      error:           e.message
     });
   }
 });
@@ -165,7 +210,7 @@ router.post('/:id/save', requireLogin, async (req, res, next) => {
         loggedIn:    true,
         meals,
         savedMeals:  saved,
-        currentDate: new Date().toLocaleDateString(),
+        selectedISODate: isoDate,
         dailyTotals,
         saveError:   'Meal already exists in saved meals'
       });

@@ -24,11 +24,19 @@ function toObjectId(id) {
 
 /*—— Logged Meals (meals collection) ——*/
 
-export const getMealsByUser = async (userId) => {
-  if (!userId) throw new Error('You must provide a user id');
-  const uid = normalizeUserId(userId);
-  const coll = await meals();
-  return coll.find({ userId: uid, isSaved: false }).sort({ date: -1 }).toArray();
+export const getMealsByUser = async (userId, isoDate) => {
+    if (!userId) throw new Error('You must provide a user id');
+    const uid = normalizeUserId(userId);
+    const coll = await meals();
+  
+    const filter = { userId: uid, isSaved: false };
+    if (isoDate) {
+      const dayStart = new Date(isoDate);
+      const dayEnd   = new Date(dayStart.getTime() + 24*60*60*1000);
+      filter.date = { $gte: dayStart, $lt: dayEnd };
+    }
+  
+    return coll.find(filter).sort({ date: -1 }).toArray();
 };
 
 export const getMealById = async (mealId, userId) => {

@@ -52,9 +52,9 @@ function generateCalendar() {
     if (workoutMap && workoutMap[formattedDate]) {
       const list = document.createElement('ul');
       list.className = 'workout-list';
-      for (const workoutGroup of workoutMap[formattedDate]) {
+      for (const workoutName of workoutMap[formattedDate]) {
         const li = document.createElement('li');
-        li.textContent = workoutGroup;
+        li.textContent = workoutName;
         list.appendChild(li);
       }
       cell.appendChild(list);
