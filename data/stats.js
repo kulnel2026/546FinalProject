@@ -14,8 +14,7 @@ export const getWorkoutStatsForUser = async (userId) => {
       daily: {},
       monthly: {},
       yearly: {}
-    },
-    groupStats: {}
+    }
   };
 
   for (const entry of userEntries) {
@@ -56,7 +55,6 @@ export const getWorkoutStatsForUser = async (userId) => {
       }
     }
 
-    console.log(stats.groupStats);
   }
 
   // Convert timeline objects to arrays for Chart.js

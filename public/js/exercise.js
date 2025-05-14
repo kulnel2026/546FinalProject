@@ -23,3 +23,4 @@ document.querySelector('.workout-form')?.addEventListener('submit', (e) => {
     timeInput.focus();
   }
 });
+

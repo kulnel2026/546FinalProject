@@ -8,9 +8,8 @@ router.get('/', async (req, res) => {
   try {
     const workoutStats = await getWorkoutStatsForUser(userId);
 
-    console.log(workoutStats);
 
-    
+
     res.render('stats', {
       title: 'Your Workout Stats',
       workoutStats

@@ -14,6 +14,22 @@ export const createWorkout = async (username, group, time, exercises) => {
     reactions: []
   };
 
+
+  for (let exercise of exercises){
+    if (typeof exerciseName != "string"){
+      throw new Error('Exercise name has to be a string');
+    }
+
+
+    if (
+      exercise.sets < 0 ||
+      exercise.reps < 0 ||
+      exercise.weight < 0
+    ) {
+      throw new Error('Exercise fields cannot be negative');
+    }
+  }
+
   const insertInfo = await workoutCollection.insertOne(newWorkout);
   if (!insertInfo.acknowledged || !insertInfo.insertedId) throw 'Workout insert failed';
 

@@ -63,7 +63,13 @@ router.post('/add', async (req, res) => {
       weight: Number(exerciseWeight)
     }];
 
-    for (let exercise in exercises){
+
+    for (let exercise of exercises){
+
+      if (typeof exerciseName != "string"){
+        throw new Error('Exercise name has to be a string');
+      }
+
       if (
         exercise.sets < 0 ||
         exercise.reps < 0 ||
@@ -101,7 +107,7 @@ router.post('/edit/:id', async (req, res) => {
     }];
 
 
-    for (let exercise in exercises){
+    for (let exercise of exercises){
       if (
         exercise.sets < 0 ||
         exercise.reps < 0 ||
