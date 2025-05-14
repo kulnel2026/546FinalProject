@@ -1,3 +1,5 @@
+
+// routes/mealTrackerRoutes.js
 import { Router } from 'express';
 import {
   getMealsByUser,
@@ -31,55 +33,39 @@ function extractUserId(sessionUser) {
 // GET /meals → render tracker
 router.get('/', requireLogin, async (req, res) => {
   try {
-    const userId = extractUserId(req.session.user);
+    const userId        = extractUserId(req.session.user);
+    const selectedISODate = req.query.date || new Date().toISOString().slice(0, 10);
+    const saveError     = req.query.saveError;
 
-    // 1) figure out which ISO date to show (YYYY‑MM‑DD)
-    const isoDate = req.query.date || new Date().toISOString().slice(0,10);
-
-    // 2) fetch all meals and filter to that day
     const allMeals = await getMealsByUser(userId);
-    const meals = allMeals.filter(m => {
-      const mIso = new Date(m.date).toISOString().slice(0,10);
-      return mIso === isoDate;
-    });
+    const meals    = allMeals.filter(m =>
+      (m.date || '').slice(0,10) === selectedISODate
+    );
 
-    // 3) fetch saved meals unchanged
     let savedMeals = await getSavedMeals(userId);
     savedMeals = savedMeals.sort((a, b) =>
       a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
     );
-    
-    // 4) compute totals for just this day
+
     const dailyTotals = meals.reduce((acc, m) => {
       acc.calories += Number(m.calories) || 0;
       acc.protein  += Number(m.protein)  || 0;
       acc.carbs    += Number(m.carbs)    || 0;
-      acc.fats     += Number(m.fat)      || 0;
+      acc.fat      += Number(m.fat)      || 0;
       return acc;
-    }, { calories:0, protein:0, carbs:0, fats:0 });
+    }, { calories:0, protein:0, carbs:0, fat:0 });
 
-    // 5) render with both ISO and pretty dates
     res.render('mealTracker', {
-      title:             'Meal Tracker',
-      loggedIn:          true,
-      meals,             // filtered by date
-      savedMeals,        // all saved templates
-      selectedISODate:   isoDate,            // for <input type="date">
-      dailyTotals
+      title:            'Meal Tracker',
+      loggedIn:         true,
+      selectedISODate,
+      meals,
+      savedMeals,
+      dailyTotals,
+      saveError        // this drives your {{#if saveError}} banner
     });
-
   } catch (e) {
-    // note: isoDate may be undefined here, so recalc
-    const isoDate = req.query.date || new Date().toISOString().slice(0,10);
-    res.status(500).render('mealTracker', {
-      title:             'Meal Tracker',
-      loggedIn:          true,
-      meals:             [],
-      savedMeals:        [],
-      selectedISODate:   isoDate,
-      dailyTotals:       { calories:0, protein:0, carbs:0, fats:0 },
-      error:             e.message
-    });
+    // ... your existing error path
   }
 });
 
@@ -87,135 +73,132 @@ router.get('/', requireLogin, async (req, res) => {
 router.post('/add', requireLogin, async (req, res) => {
   try {
     const userId = extractUserId(req.session.user);
-
-    // 1) determine current view-date
-    const isoDate   = req.body.filterDate
-                    || req.query.date
-                    || new Date().toISOString().slice(0,10);
-
-    // 2) determine which date to stamp on the new meal
-    const entryDate = req.body.entryDate || isoDate;
-
-    // 3) build and add the meal
-    const mealData = {
-      name:     req.body.name,
-      date:     entryDate,
-      calories: Number(req.body.calories),
-      protein:  Number(req.body.protein),
-      carbs:    Number(req.body.carbs),
-      fat:      Number(req.body.fat)
-    };
-    await addMeal(userId, mealData);
-
-    // 4) redirect back to the same date view
-    return res.redirect(`/meals?date=${isoDate}`);
+    const { filterDate, entryDate } = req.body;
+    if (typeof req.body.name !== 'string' || !/^[A-Za-z ]+$/.test(req.body.name)) {
+      throw new Error('Name must contain only letters and spaces');
+    }
+    req.body.date = entryDate;
+    await addMeal(userId, req.body);
+    return res.redirect(`/meals?date=${encodeURIComponent(filterDate)}`);
 
   } catch (e) {
-    // on error, re‑fetch for that same date and re‑render
     const userId     = extractUserId(req.session.user);
-    const isoDate    = req.body.filterDate
-                     || req.query.date
-                     || new Date().toISOString().slice(0,10);
-    const allMeals   = await getMealsByUser(userId);
-    const meals      = allMeals.filter(m =>
-      new Date(m.date).toISOString().slice(0,10) === isoDate
+    const allMeals  = await getMealsByUser(userId);
+    const { filterDate} = req.body;
+    const meals      = allMeals.filter(m => (m.date||'').slice(0,10) === filterDate);
+    let savedMeals = await getSavedMeals(userId);
+    savedMeals = savedMeals.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
     );
-    const savedMeals = await getSavedMeals(userId);
     const dailyTotals = meals.reduce((acc, m) => {
       acc.calories += Number(m.calories) || 0;
       acc.protein  += Number(m.protein)  || 0;
       acc.carbs    += Number(m.carbs)    || 0;
-      acc.fats     += Number(m.fat)      || 0;
+      acc.fat     += Number(m.fat)      || 0;
       return acc;
-    }, { calories:0, protein:0, carbs:0, fats:0 });
+    }, { calories:0, protein:0, carbs:0, fat:0 });
 
-    return res.status(400).render('mealTracker', {
-      title:           'Meal Tracker',
-      loggedIn:        true,
+    res.status(400).render('mealTracker', {
+      title:        'Meal Tracker',
+      loggedIn:     true,
       meals,
       savedMeals,
-      selectedISODate: isoDate,
+      selectedISODate: filterDate,
       dailyTotals,
-      error:           e.message
+      error:        e.message
     });
   }
 });
 
 // POST /meals/saved → add a new saved template
-router.post('/saved', requireLogin, async (req, res, next) => {
+router.post('/saved', requireLogin, async (req, res) => {
+  const { filterDate } = req.body;
+  
+  const userId     = extractUserId(req.session.user);
+  const allMeals   = await getMealsByUser(userId);
+  const meals    = allMeals.filter(m =>
+    (m.date||'').slice(0,10) === filterDate
+  );
+  let savedMeals   = await getSavedMeals(userId);
+
+  const dailyTotals = meals.reduce((acc, m) => {
+    acc.calories += Number(m.calories) || 0;
+    acc.protein  += Number(m.protein)  || 0;
+    acc.carbs    += Number(m.carbs)    || 0;
+    acc.fat     += Number(m.fat)      || 0;
+    return acc;
+  }, { calories:0, protein:0, carbs:0, fat:0 });
+
   try {
-    const userId = extractUserId(req.session.user);
+    if (typeof req.body.name !== 'string' || !/^[A-Za-z ]+$/.test(req.body.name)) {
+      throw new Error('Name must contain only letters and spaces');
+    }
     const newTemplate = {
       name:     req.body.name,
-      calories: Number(req.body.calories) || 0,
-      protein:  Number(req.body.protein)  || 0,
-      carbs:    Number(req.body.carbs)    || 0,
-      fat:      Number(req.body.fat)      || 0
+      calories: Number(req.body.calories),
+      protein:  Number(req.body.protein),
+      carbs:    Number(req.body.carbs),
+      fat:      Number(req.body.fat)
     };
-    const inserted = await addSavedMeal(userId, newTemplate);
-    return res.redirect('/meals');
+    await addSavedMeal(userId, newTemplate);
+    return res.redirect(`/meals?date=${encodeURIComponent(filterDate)}`);
   } catch (e) {
-    return next(e);
+    // render with the error banner
+    return res.status(400).render('mealTracker', {
+      title:        'Meal Tracker',
+      loggedIn:     true,
+      selectedISODate:  filterDate,
+      meals,
+      savedMeals,
+      dailyTotals,
+      saveError:    e.message    // show “Nutrients must be non‑negative” (or duplicates)
+    });
   }
 });
 
 // PUT /meals/saved/:id → update a saved meal template inline
 router.put('/saved/:id', requireLogin, async (req, res) => {
   try {
-    const userId  = extractUserId(req.session.user);
-    const updated = await updateSavedMeal(req.params.id, userId, req.body);
-    return res.json({ success: true, updated });
+    const userId = extractUserId(req.session.user);
+    await updateSavedMeal(req.params.id, userId, req.body);
+    return res.json({ success:true });
   } catch (e) {
     return res.status(400).json({ error: e.message });
   }
 });
 
 // POST /meals/saved/:id/delete → remove a saved template
-router.post('/saved/:id/delete', requireLogin, async (req, res, next) => {
+router.post('/saved/:id/delete', requireLogin, async (req, res) => {
+  const { filterDate } = req.body;
   try {
     const userId = extractUserId(req.session.user);
     await removeSavedMeal(req.params.id, userId);
-    return res.redirect('/meals');
+    return res.redirect(`/meals?date=${encodeURIComponent(filterDate)}`);
   } catch (e) {
-    return next(e);
+    return res.status(500).redirect(`/meals?date=${encodeURIComponent(filterDate)}`);
   }
 });
 
-// POST /meals/:id/save → save a logged meal as a template
-router.post('/:id/save', requireLogin, async (req, res, next) => {
-  try {
-    const userId   = extractUserId(req.session.user);
-    const meal     = await getMealById(req.params.id, userId);
-    const saved    = await getSavedMeals(userId);
-    const meals    = await getMealsByUser(userId);
-    const dailyTotals = meals.reduce((acc, m) => {
-      acc.calories += Number(m.calories) || 0;
-      acc.protein  += Number(m.protein)  || 0;
-      acc.carbs    += Number(m.carbs)    || 0;
-      acc.fats     += Number(m.fat)      || 0;
-      return acc;
-    }, { calories:0, protein:0, carbs:0, fats:0 });
+router.post('/:id/save', requireLogin, async (req, res) => {
+  const userId     = extractUserId(req.session.user);
+  const { filterDate } = req.body; // from your hidden <input name="filterDate">
 
-    const duplicate = saved.some(s =>
-      s.name     === meal.name     &&
+  try {
+    const meal  = await getMealById(req.params.id, userId);
+    const saved = await getSavedMeals(userId);
+
+    // duplicate?
+    if (saved.some(s =>
+      s.name     === meal.name &&
       Number(s.calories) === Number(meal.calories) &&
       Number(s.protein)  === Number(meal.protein)  &&
       Number(s.carbs)    === Number(meal.carbs)    &&
       Number(s.fat)      === Number(meal.fat)
-    );
-
-    if (duplicate) {
-      return res.status(400).render('mealTracker', {
-        title:       'Meal Tracker',
-        loggedIn:    true,
-        meals,
-        savedMeals:  saved,
-        selectedISODate: isoDate,
-        dailyTotals,
-        saveError:   'Meal already exists in saved meals'
-      });
+    )) {
+      throw new Error('Meal already exists in saved meals');
     }
 
+    // insert new template
     await addSavedMeal(userId, {
       name:     meal.name,
       calories: meal.calories,
@@ -223,31 +206,63 @@ router.post('/:id/save', requireLogin, async (req, res, next) => {
       carbs:    meal.carbs,
       fat:      meal.fat
     });
-    return res.redirect('/meals');
+
+    // success → back to list view for that date
+    return res.redirect(`/meals?date=${encodeURIComponent(filterDate)}`);
   } catch (e) {
-    return next(e);
+    // on error, re‑fetch all the data for that same date and render with saveError
+    const allMeals   = await getMealsByUser(userId);
+    const meals      = allMeals.filter(m => (m.date||'').slice(0,10) === filterDate);
+    let savedMeals   = await getSavedMeals(userId);
+    savedMeals       = savedMeals.sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+    );
+    const dailyTotals = meals.reduce((acc, m) => {
+      acc.calories += Number(m.calories) || 0;
+      acc.protein  += Number(m.protein)  || 0;
+      acc.carbs    += Number(m.carbs)    || 0;
+      acc.fat      += Number(m.fat)      || 0;
+      return acc;
+    }, { calories:0, protein:0, carbs:0, fat:0 });
+
+    // render mealTracker with a banner but keep the same filterDate
+    return res.status(400).render('mealTracker', {
+      title:            'Meal Tracker',
+      loggedIn:         true,
+      selectedISODate:  filterDate,
+      meals,
+      savedMeals,
+      dailyTotals,
+      saveError:        e.message
+    });
   }
 });
 
+
 // POST /meals/:id/delete → delete a logged meal
-router.post('/:id/delete', requireLogin, async (req, res, next) => {
+router.post('/:id/delete', requireLogin, async (req, res) => {
+  const { filterDate } = req.body;
   try {
     const userId = extractUserId(req.session.user);
     await removeMeal(req.params.id, userId);
-    return res.redirect('/meals');
+    return res.redirect(`/meals?date=${encodeURIComponent(filterDate)}`);
   } catch (e) {
-    return next(e);
+    return res.status(500).redirect(`/meals?date=${encodeURIComponent(filterDate)}`);
   }
 });
+
 
 // PUT /meals/:id → update a logged meal inline
 router.put('/:id', requireLogin, async (req, res) => {
   try {
+    if (req.body.name && !/^[A-Za-z ]+$/.test(req.body.name)) {
+      return res.status(400).json({ success:false, error:'Name must contain only letters and spaces' });
+    }
     const userId = extractUserId(req.session.user);
     await updateMeal(req.params.id, userId, req.body);
-    return res.json({ success: true });
+    return res.json({ success:true });
   } catch (e) {
-    return res.status(400).json({ error: e.message });
+    return res.status(400).json({ error:e.message });
   }
 });
 
