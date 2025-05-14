@@ -21,3 +21,4 @@ export const meals = getCollectionFn('meals');
 export const workouts = getCollectionFn('workouts');
 export const calendarEntries = getCollectionFn('calendarEntries');
 export const savedMeals = getCollectionFn('savedMeals');
+export const goalTracker = getCollectionFn('goalTracker');

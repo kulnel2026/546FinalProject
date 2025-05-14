@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Goal Tracker</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+
+  <main class="page-content">
+    <!-- Page Title -->
+    <h1 class="page-title">Goal Tracker</h1>
+
+    <!-- Error Message -->
+    {{#if error}}
+      <div class="alert alert--error">{{error}}</div>
+    {{/if}}
+
+    <!-- Goals Form -->
+    <form action="/goals" method="POST" class="goals-form">
+      <div class="goals-grid">
+        <!-- Left column: Macro Goals -->
+        <fieldset>
+          <legend>Macro Goals</legend>
+          <label>
+            Calorie Goal
+            <input type="number" name="calorieGoal" value="{{goals.calorieGoal}}" required>
+          </label>
+          <label>
+            Protein Goal
+            <input type="number" name="proteinGoal" value="{{goals.proteinGoal}}" required>
+          </label>
+          <label>
+            Carbs Goal
+            <input type="number" name="carbsGoal" value="{{goals.carbsGoal}}" required>
+          </label>
+          <label>
+            Fat Goal
+            <input type="number" name="fatGoal" value="{{goals.fatGoal}}" required>
+          </label>
+        </fieldset>
+
+        <!-- Right column: Body Metrics & submit -->
+        <fieldset>
+          <legend>Body Metrics</legend>
+          <label>
+            Weight (kg)
+            <input type="number" step="0.1" name="weight" value="{{goals.weight}}" required>
+          </label>
+          <label>
+            Height (cm)
+            <input type="number" step="0.1" name="height" value="{{goals.height}}" required>
+          </label>
+          <button type="submit" class="btn btn-primary">
+            Save Goals &amp; Calculate BMI
+          </button>
+        </fieldset>
+      </div>
+    </form>
+
+    <!-- Results -->
+    {{#if goals.bmi}}
+      <div class="results">
+        <div class="result-item">
+          <h2>Your BMI</h2>
+          <p>{{goals.bmi}}</p>
+        </div>
+        <div class="result-item">
+          <h2>Maintenance Calories</h2>
+          <p>{{goals.maintenance}} kcal/day</p>
+        </div>
+      </div>
+    {{/if}}
+  </main>
+
+  <script src="/js/meal-edit.js" defer></script>
+</body>
+</html>

@@ -1,6 +1,7 @@
 const calendarEl = document.getElementById('calendar');
 const monthSelect = document.getElementById('month');
 const yearSelect = document.getElementById('year');
+const viewSelect = document.getElementById('calendarView');
 
 // Populate month and year dropdowns
 const today = new Date();
@@ -23,59 +24,89 @@ for (let y = currentYear - 5; y <= currentYear + 5; y++) {
   yearSelect.appendChild(option);
 }
 
-// Generate a basic calendar
-function generateCalendar() {
-  calendarEl.innerHTML = ''; // Clear previous calendar
+function getFormattedDate(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
 
-  const year = parseInt(yearSelect.value);
-  const month = parseInt(monthSelect.value);
+function renderDayCell(year, month, day) {
+  const cell = document.createElement('div');
+  const dayNum = document.createElement('div');
+  dayNum.className = 'day-number';
+  dayNum.textContent = day;
+  cell.appendChild(dayNum);
+
+  const formattedDate = getFormattedDate(year, month, day);
+
+  // Add workout groups
+  if (workoutMap && workoutMap[formattedDate]) {
+    const list = document.createElement('ul');
+    list.className = 'workout-list';
+    for (const group of workoutMap[formattedDate]) {
+      const li = document.createElement('li');
+      li.textContent = group;
+      list.appendChild(li);
+    }
+    cell.appendChild(list);
+  }
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-workout-btn';
+  addBtn.textContent = '➕ Add Workout';
+  addBtn.onclick = () => {
+    window.location.href = `/calendar/selectWorkout?date=${formattedDate}`;
+  };
+  cell.appendChild(addBtn);
+  return cell;
+}
+
+function generateMonthView(year, month) {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Add empty cells for days before the 1st
   for (let i = 0; i < firstDay; i++) {
-    const cell = document.createElement('div');
-    calendarEl.appendChild(cell);
+    calendarEl.appendChild(document.createElement('div')); // Empty cell
   }
 
-  // Add actual day cells
   for (let day = 1; day <= daysInMonth; day++) {
-    const cell = document.createElement('div');
-    const dayNum = document.createElement('div');
-    dayNum.className = 'day-number';
-    dayNum.textContent = day;
-    cell.appendChild(dayNum);
-
-    const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-    //Add workout names if present
-    if (workoutMap && workoutMap[formattedDate]) {
-      const list = document.createElement('ul');
-      list.className = 'workout-list';
-      for (const workoutName of workoutMap[formattedDate]) {
-        const li = document.createElement('li');
-        li.textContent = workoutName;
-        list.appendChild(li);
-      }
-      cell.appendChild(list);
-    }
-
-    // Add Workout Button
-    const addBtn = document.createElement('button');
-    addBtn.className = 'add-workout-btn';
-    addBtn.textContent = '➕ Add Workout';
-    addBtn.onclick = () => {
-    // Redirect to the add-workout modal/page and pass the date
-        window.location.href = `/calendar/selectWorkout?date=${formattedDate}`;
-  };
-
-    cell.appendChild(addBtn);
-    calendarEl.appendChild(cell);
-
+    calendarEl.appendChild(renderDayCell(year, month, day));
   }
 }
 
-// Rerender calendar when dropdowns change
+function generateWeekView(year, month, baseDay) {
+  const baseDate = new Date(year, month, baseDay);
+  const baseWeekDay = baseDate.getDay(); // 0 (Sun) - 6 (Sat)
+  const start = new Date(baseDate);
+  start.setDate(baseDay - baseWeekDay); // Sunday
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    calendarEl.appendChild(renderDayCell(d.getFullYear(), d.getMonth(), d.getDate()));
+  }
+}
+
+function generateDayView(year, month, baseDay) {
+  calendarEl.appendChild(renderDayCell(year, month, baseDay));
+}
+
+function generateCalendar() {
+  calendarEl.innerHTML = ''; // Clear previous
+  const year = parseInt(yearSelect.value);
+  const month = parseInt(monthSelect.value);
+  const viewType = viewSelect.value;
+
+  if (viewType === 'month') {
+    generateMonthView(year, month);
+  } else if (viewType === 'week') {
+    generateWeekView(year, month, today.getDate());
+  } else if (viewType === 'day') {
+    generateDayView(year, month, today.getDate());
+  }
+}
+
+// Event listeners
 monthSelect.addEventListener('change', generateCalendar);
 yearSelect.addEventListener('change', generateCalendar);
+viewSelect.addEventListener('change', generateCalendar);
 window.addEventListener('DOMContentLoaded', generateCalendar);
+

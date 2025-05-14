@@ -135,9 +135,11 @@ html, body {
 
 /* MAKE ROOM FOR FIXED NAV & FOOTER */
 .page-content {
-  flex: 1;                  /* grow to fill available space */
-  padding-top: 60px;        /* equal to nav height */
-  padding-bottom: 60px;     /* equal to footer height */
+  display: flex;     
+  flex-direction: column;       
+  align-items: center;
+  padding: 2rem 1rem;
+  margin-top: 4rem;
 }
 
 /* HERO SECTION */
@@ -208,72 +210,6 @@ html, body {
   font-size: 1.75rem;
 }
 
-.nutrition-goals {
-  max-width: 500px;
-  margin: 2rem auto;
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.nutrition-goals h3 {
-  margin-top: 0;
-  text-align: center;
-  font-size: 1.5rem;
-}
-
-.nutrition-goals .field {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
-
-.nutrition-goals .field label {
-  margin-bottom: 0.25rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.nutrition-goals .field input {
-  padding: 0.5rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-}
-
-.nutrition-goals .buttons {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.nutrition-goals .buttons button {
-  padding: 0.5rem 1rem;
-  background: #556b2f;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-}
-
-.nutrition-goals .buttons button:hover {
-  background: #445723;
-}
-
-.nutrition-goals .results {
-  margin-top: 1.5rem;
-  background: #f9f9f9;
-  padding: 1rem;
-  border-radius: 4px;
-}
-
-.nutrition-goals .results p {
-  margin: 0.5rem 0;
-  font-size: 1rem;
-}
-
 /* FOOTER */
 .site-footer {
   position: relative;
@@ -289,8 +225,6 @@ html, body {
   white-space: normal;
   overflow-wrap: break-word;
 }
-
-
 
 /*Buttons*/
 .button-group {
@@ -318,8 +252,11 @@ html, body {
 }
 
 
-page-title {
-  margin-bottom: 30px;
+.page-title {
+  font-size: 2rem;
+  margin: 1.5rem 0;
+  text-align: center;
+  color: #333;
 }
 
 .workout-form {
@@ -585,4 +522,141 @@ tr.editing .btn-save-saved {
 .btn-delete:focus {
   background-color: #c62828;
   border-color: #c62828;
+}
+
+.goals-form {
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.goals-form .goals-grid {
+  display: flex;
+  gap: 2rem;
+}
+
+.goals-form fieldset {
+  flex: 1;
+  border: none;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.goals-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: #444;
+}
+
+.goals-form legend {
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.goals-form input {
+  margin-top: 0.4rem;
+  padding: 0.6rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.goals-form fieldset label {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.goals-form fieldset input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+}
+
+.goals-form fieldset:first-of-type {
+  background: #fafafa;
+}
+.goals-form fieldset:last-of-type {
+  background: #fdfdfd;
+}
+
+.goals-form fieldset:last-of-type {
+  display: flex;
+  flex-direction: column;
+}
+.goals-form fieldset:last-of-type button {
+  margin-top: auto;
+  align-self: flex-start;
+  padding: 0.6rem 1.2rem;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.goals-form fieldset:last-of-type button:hover {
+  background: #45a049;
+}
+
+
+.btn-primary {
+  align-self: flex-end;
+  padding: 0.6rem 1.2rem;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+.btn-primary:hover {
+  background: #45a049;
+}
+
+.results {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 3rem auto 0; 
+  max-width: 800px;     
+  width: 100%;
+}
+
+.goals-form {
+  margin-top: 1.5rem;  /* adjust this value to taste */
+}
+
+/* If you want the two panels to have extra padding at their top edge */
+.goals-form fieldset {
+  padding-top: 2rem;   /* instead of 1.5rem, or add extra */
+}
+
+.result-item {
+  background: #e8f5e9;
+  padding: 1rem;
+  border-radius: 4px;
+  flex: 1 1 150px;
+  text-align: center;
+}
+
+.result-item h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.result-item p {
+  font-size: 1.5rem;
+  margin: 0;
+  font-weight: bold;
 }

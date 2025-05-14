@@ -47,3 +47,34 @@
     font-size: 12px;
     color: #333;
   }
+
+ .view-selector {
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  
+  .view-selector label {
+    margin-right: 5px;
+    font-weight: bold;
+  }
+
+.calendar.month-view {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar.week-view {
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar.day-view {
+  grid-template-columns: 1fr;
+}
+
+.calendar-entry-group {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #333;
+  background-color: #f0f8ea;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
