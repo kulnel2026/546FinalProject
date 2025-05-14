@@ -90,3 +90,22 @@
   padding: 4px 6px;
   border-radius: 4px;
 }
+
+.calendar.day-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+.day-cell-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.calendar.day-view > .day-cell-wrapper > div {
+  width: 300px;
+  min-height: 200px;
+  font-size: 1.2rem;
+}
