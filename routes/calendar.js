@@ -1,10 +1,12 @@
 import { Router } from 'express';
-import {getAllWorkouts, getWorkoutById} from '../data/workouts.js';
-import { createEntry, getEntriesByUser} from '../data/calendarEntries.js';
+import { getAllWorkouts, getWorkoutById } from '../data/workouts.js';
+import { createEntry, getEntriesByUser } from '../data/calendarEntries.js';
+import { getMealsByUser } from '../data/meals.js';
 
 const router = Router();
 
-router.route('/').get(async (req, res) => {
+// GET /calendar → render calendar with workouts and meals for client
+router.get('/', async (req, res, next) => {
   try {
     if (!req.session.user) {
       return res.status(403).render('error', {
@@ -13,112 +15,116 @@ router.route('/').get(async (req, res) => {
       });
     }
 
-    let userId = req.session.user.userId;
-    let entries = await getEntriesByUser(userId);
+    const userId = req.session.user.userId;
+    // determine month & year
+    const month = Number(req.query.month) || (new Date()).getMonth() + 1;
+    const year  = Number(req.query.year)  || (new Date()).getFullYear();
+    const start = new Date(year, month - 1, 1);
+    const end   = new Date(year, month, 0, 23, 59, 59);
 
-    // Format to map like: { '2025-05-13': ['Running', 'Swimming'], ... }
-    let workoutMap = {};
-    for (let entry of entries) {
-      let dateStr = entry.date.toISOString().split('T')[0];
-      let workoutNames = entry.workouts.map(w => w.name);
-      if (!workoutMap[dateStr]) workoutMap[dateStr] = [];
-      workoutMap[dateStr].push(...workoutNames);
+    // build workout map for client
+    const entries = await getEntriesByUser(userId);
+    const workoutMap = {};
+    for (const entry of entries) {
+      const dateStr = entry.date.toISOString().split('T')[0];
+      const names   = entry.workouts.map(w => w.name);
+      workoutMap[dateStr] = (workoutMap[dateStr] || []).concat(names);
     }
 
-    res.render('calendar', {
-      title: 'Your Calendar',
-      loggedIn: true,
-      workoutMap: workoutMap
+    // build meal map for client
+    const allMeals = await getMealsByUser(userId);
+    const mealMap  = {};
+    for (const meal of allMeals) {
+      const d = new Date(meal.date);
+      if (d >= start && d <= end) {
+        const dateStr = d.toISOString().split('T')[0];
+        mealMap[dateStr] = (mealMap[dateStr] || []).concat(meal.name);
+      }
+    }
+
+    // send both maps as JSON blobs for calendar.js
+    return res.render('calendar', {
+      title:           'Your Calendar',
+      loggedIn:        true,
+      workoutMapJSON:  JSON.stringify(workoutMap),
+      mealMapJSON:     JSON.stringify(mealMap)
     });
   } catch (e) {
-    res.status(500).render('error', {
+    return res.status(500).render('error', {
       title: 'Error',
       error: e.toString()
     });
   }
 });
 
+// GET /calendar/selectWorkout → show workout picker for a date
 router.get('/selectWorkout', async (req, res) => {
   if (!req.session.user) {
     return res.status(403).render('error', { error: 'Login required.' });
   }
-
   const { date } = req.query;
   const username = req.session.user.userId;
-  try{
-  // Fetch saved workouts for this user
-  const saved = await getAllWorkouts(username); // assuming it filters by user
-
-  res.render('selectWorkout', {
-    title: `Add Workout to ${date}`,
-    date,
-    savedWorkouts: saved,
-    loggedIn: true
-  });
-  }catch(e){
+  try {
+    const saved = await getAllWorkouts(username);
+    return res.render('selectWorkout', {
+      title:         `Add Workout to ${date}`,
+      date,
+      savedWorkouts: saved,
+      loggedIn:      true
+    });
+  } catch (e) {
     return res.status(500).render('error', {
       title: 'Error fetching workouts',
-      error: e.toString()});
+      error: e.toString()
+    });
   }
 });
 
-
+// POST /calendar/assignWorkout → add workout entry
 router.post('/assignWorkout', async (req, res) => {
-
+  if (!req.session.user) {
+    return res.status(403).render('error', {
+      title: 'Access Denied',
+      error: 'You must be logged in to assign a workout.'
+    });
+  }
+  const userId = req.session.user.userId;
+  const { workoutId, date } = req.body;
+  if (!workoutId || !date) {
+    return res.status(400).render('error', {
+      title: 'Missing Data',
+      error: 'Workout ID and date are required.'
+    });
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return res.status(400).render('error', {
+      title: 'Invalid Date',
+      error: 'Date must be in YYYY-MM-DD format.'
+    });
+  }
   try {
-    if (!req.session.user) {
-      return res.status(403).render('error', {
-        title: 'Access Denied',
-        error: 'You must be logged in to assign a workout.'
-      });
-    }
-
-    const userId = req.session.user.userId;
-    const { workoutId, date } = req.body;
-
-    if (!workoutId || !date) {
-      return res.status(400).render('error', {
-        title: 'Missing Data',
-        error: 'Workout ID and date are required.'
-      });
-    }
-
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return res.status(400).render('error', {
-        title: 'Invalid Date',
-        error: 'Date must be in YYYY-MM-DD format.'
-      });
-    }
-
     const workout = await getWorkoutById(workoutId);
-
     if (!workout || !Array.isArray(workout.exercises)) {
       return res.status(404).render('error', {
         title: 'Workout Not Found',
         error: 'Workout does not exist or has no exercises.'
       });
     }
-
-    const formattedWorkouts = workout.exercises.map((ex) => ({
-      name: String(ex.name).trim(),
-      sets: String(ex.sets).trim(),
-      reps: String(ex.reps).trim(),
-      weight: String(ex.weight).trim(),
-      group: workout.group?.trim()
+    const formatted = workout.exercises.map(ex => ({
+      name:   ex.name.toString().trim(),
+      sets:   ex.sets.toString().trim(),
+      reps:   ex.reps.toString().trim(),
+      weight: ex.weight.toString().trim(),
+      group:  workout.group?.trim()
     }));
-
-    // Add workout to calendar entry (meals = [])
-    await createEntry(userId, date.trim(), formattedWorkouts, []);
-
+    await createEntry(userId, date.trim(), formatted, []);
     return res.redirect('/calendar');
-  } catch (e) {
+  } catch (err) {
     return res.status(500).render('error', {
       title: 'Assignment Error',
-      error: e.toString()
+      error: err.toString()
     });
   }
 });
-
-
 
 export default router;
