@@ -135,11 +135,9 @@ html, body {
 
 /* MAKE ROOM FOR FIXED NAV & FOOTER */
 .page-content {
-  display: flex;     
-  flex-direction: column;       
-  align-items: center;
-  padding: 2rem 1rem;
-  margin-top: 4rem;
+  flex: 1;                  /* grow to fill available space */
+  padding-top: 60px;        /* equal to nav height */
+  padding-bottom: 60px;     /* equal to footer height */
 }
 
 /* HERO SECTION */
@@ -210,6 +208,7 @@ html, body {
   font-size: 1.75rem;
 }
 
+
 /* FOOTER */
 .site-footer {
   position: relative;
@@ -250,7 +249,6 @@ html, body {
 .form-button:hover {
   background-color: #6a8e3d;
 }
-
 
 .page-title {
   font-size: 2rem;
@@ -300,13 +298,6 @@ html, body {
   justify-content: center; /* Optional: for vertical centering */
   min-height: 100vh;
   text-align: center;
-}
-
-/* Page title styling */
-.page-title {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  color: #333;
 }
 
 /* Style the workout list */
@@ -360,8 +351,7 @@ html, body {
   grid-template-columns: 2fr 1fr;
   gap: 2rem;
 
-  /* limit its height and scroll internally */
-  max-height: calc(100vh - 200px);  /* adjust 200px to match header+padding height */
+  max-height: calc(100vh - 200px);
   overflow-y: auto;
 }
 
@@ -463,7 +453,7 @@ tr.editing .meal-input {
 }
 
 .btn-edit {
-  background-color: #556b2f;   /* a blue, for example */
+  background-color: #556b2f;   
   border: 1px solid #556b2f;
   color: #fff;
 }
@@ -472,7 +462,6 @@ tr.editing .meal-input {
   background-color: #556b2f;
   border-color: #556b2f;
 }
-
 
 tr.editing .btn-edit {
   display: none;
@@ -493,7 +482,7 @@ tr.editing .btn-save{
 .inline-actions {
   display: flex;
   gap: 0.3rem;
-  width: 8rem;      /* enough for Edit → Save */
+  width: 8rem;    
   flex-shrink: 0;
 }
 
@@ -510,9 +499,7 @@ tr.editing .btn-save-saved {
 .btn-save {
   display: none;
 }
-/* === Permanent “Save Meal” button uses .btn--secondary, no change needed === */
 
-/* === Permanent Delete button === */
 .btn-delete {
   background-color: #e53935;
   border: 1px solid #e53935;
@@ -592,6 +579,7 @@ tr.editing .btn-save-saved {
   display: flex;
   flex-direction: column;
 }
+
 .goals-form fieldset:last-of-type button {
   margin-top: auto;
   align-self: flex-start;
@@ -606,7 +594,6 @@ tr.editing .btn-save-saved {
 .goals-form fieldset:last-of-type button:hover {
   background: #45a049;
 }
-
 
 .btn-primary {
   align-self: flex-end;
