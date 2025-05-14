@@ -2,12 +2,16 @@
   <section class="daily-totals">
     <h1>Daily Meal Tracker</h1>
     <div class="totals-bar">
-      <!-- date-picker; value should be YYYY-MM-DD for HTML date inputs -->
       <input
         type="date"
         id="date-picker"
         value="{{selectedISODate}}"
       />
+      {{#if saveError}}
+        <div id="save-error" class="alert alert--error">
+          {{saveError}}
+        </div>
+      {{/if}}
     </div>
   </section>
 
@@ -20,72 +24,41 @@
           <thead>
             <tr>
               <th>Name</th><th>Calories</th><th>Protein</th>
-              <th>Carbs</th><th>Fats</th><th>Actions</th>
+              <th>Carbs</th><th>Fat</th><th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {{#each meals}}
             <tr data-id="{{this._id}}">
-              <!-- Name -->
+              <!-- inline-editable Name now has pattern/title -->
               <td>
-                <input 
-                  class="meal-input" 
-                  data-field="name" 
-                  value="{{this.name}}" 
-                  readonly 
+                <input
+                  class="meal-input"
+                  data-field="name"
+                  type="text"
+                  pattern="[A-Za-z ]+"
+                  title="Only letters and spaces allowed"
+                  value="{{this.name}}"
+                  readonly
                 />
               </td>
-              <!-- Calories -->
-              <td>
-                <input 
-                  class="meal-input" 
-                  data-field="calories" 
-                  type="number" 
-                  value="{{this.calories}}" 
-                  readonly 
-                />
-              </td>
-              <!-- Protein -->
-              <td>
-                <input 
-                  class="meal-input" 
-                  data-field="protein" 
-                  type="number" 
-                  value="{{this.protein}}" 
-                  readonly 
-                />
-              </td>
-              <!-- Carbs -->
-              <td>
-                <input 
-                  class="meal-input" 
-                  data-field="carbs" 
-                  type="number" 
-                  value="{{this.carbs}}" 
-                  readonly 
-                />
-              </td>
-              <!-- Fats -->
-              <td>
-                <input 
-                  class="meal-input" 
-                  data-field="fat" 
-                  type="number" 
-                  value="{{this.fat}}" 
-                  readonly 
-                />
-              </td>
-              <!-- Actions -->
+              <td><input class="meal-input" data-field="calories" type="number" value="{{this.calories}}" readonly></td>
+              <td><input class="meal-input" data-field="protein"  type="number" value="{{this.protein}}"  readonly></td>
+              <td><input class="meal-input" data-field="carbs"    type="number" value="{{this.carbs}}"    readonly></td>
+              <td><input class="meal-input" data-field="fat"      type="number" value="{{this.fat}}"      readonly></td>
               <td class="meals-table__actions">
-                <div class="inline-actions">
-                  <button type="button" class="btn btn--small btn-edit">Edit</button>
-                  <button type="button" class="btn btn--small btn-save">Save</button>
-                </div>
-                <form action="/meals/{{this._id}}/save" method="POST">
-                  <button class="btn btn--small btn--secondary">Save Meal</button>
-                </form>
-                <form action="/meals/{{this._id}}/delete" method="POST">
+                <!-- toggle Edit/Save -->
+                <button type="button" class="btn btn--small btn-toggle">Edit</button>
+                <!-- delete -->
+                <form action="/meals/{{this._id}}/delete" method="POST" style="display:inline;">
+                  <input type="hidden" name="filterDate" value="{{selectedISODate}}" />
                   <button type="submit" class="btn btn--small btn-delete">Delete</button>
+                </form>
+                <form action="/meals/{{this._id}}/save" method="POST" style="display:inline;">
+                  <input type="hidden" name="filterDate" value="{{selectedISODate}}" />
+                  <button type="submit" class="btn btn--small btn-save-template">
+                    Save Meal
+                    </button>
                 </form>
               </td>
             </tr>
@@ -97,7 +70,7 @@
               <td>{{dailyTotals.calories}}</td>
               <td>{{dailyTotals.protein}}</td>
               <td>{{dailyTotals.carbs}}</td>
-              <td>{{dailyTotals.fats}}</td>
+              <td>{{dailyTotals.fat}}</td>
               <td></td>
             </tr>
           </tfoot>
@@ -110,25 +83,26 @@
           <input type="hidden" name="filterDate" value="{{selectedISODate}}" />
           <input type="hidden" name="entryDate"  value="{{selectedISODate}}" />
 
-          <label>
-            Name:
-            <input type="text" name="name" required />
+          <label>Name:
+            <input
+              type="text"
+              name="name"
+              pattern="[A-Za-z ]+"
+              title="Only letters and spaces allowed"
+              required
+            />
           </label>
-          <label>
-            Calories:
-            <input type="number" name="calories" required />
+          <label>Calories:
+            <input type="number" name="calories" min="0" required />
           </label>
-          <label>
-            Protein:
-            <input type="number" name="protein" required />
+          <label>Protein:
+            <input type="number" name="protein"  min="0" required />
           </label>
-          <label>
-            Carbs:
-            <input type="number" name="carbs" required />
+          <label>Carbs:
+            <input type="number" name="carbs"    min="0" required />
           </label>
-          <label>
-            Fats:
-            <input type="number" name="fat" required />
+          <label>Fat:
+            <input type="number" name="fat"      min="0" required />
           </label>
           <button class="btn btn--primary" type="submit">Add Meal</button>
         </form>
@@ -136,79 +110,139 @@
     </div>
 
     <!-- RIGHT COLUMN -->
-    <div class="column column--saved">
-      <section id="saved-meals">
-        <h2>Saved Meals</h2>
+<div class="column column--saved">
+  <section id="saved-meals">
+    <h2>Saved Meals</h2>
 
-        <!-- Add New Template -->
-        <form action="/meals/saved" method="POST" class="add-saved-form">
-          <table class="meals-table">
-            <thead>
-              <tr>
-                <th>Name</th><th>Cal</th><th>Prot</th><th>Carb</th><th>Fat</th><th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="add-row-saved">
-                <td><input name="name"     placeholder="Name"     required></td>
-                <td><input name="calories" type="number" placeholder="Cal"  required></td>
-                <td><input name="protein"  type="number" placeholder="Prot"></td>
-                <td><input name="carbs"    type="number" placeholder="Carb"></td>
-                <td><input name="fat"      type="number" placeholder="Fat"></td>
-                <td>
-                  <button class="btn btn--small btn--primary" type="submit">Add</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    {{#if saveError}}
+      <div id="save-error" class="alert alert--error">
+        {{saveError}}
+      </div>
+    {{/if}}
+
+    <form action="/meals/saved" method="POST" class="add-saved-form">
+      <input type="hidden" name="filterDate" value="{{selectedISODate}}" />
+      <table class="meals-table">
+        <thead>
+          <tr>
+            <th>Name</th><th>Cal</th><th>Prot</th><th>Carb</th><th>Fat</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="add-row-saved">
+            <td>
+              <input
+                type="text"
+                name="name"
+                placeholder="Name"
+                pattern="[A-Za-z ]+"
+                title="Only letters and spaces allowed"
+                required
+              />
+            </td>
+            <td><input name="calories" type="number" placeholder="Cal"  min="0" required></td>
+            <td><input name="protein"  type="number" placeholder="Prot" min="0"></td>
+            <td><input name="carbs"    type="number" placeholder="Carb" min="0"></td>
+            <td><input name="fat"      type="number" placeholder="Fat"  min="0"></td>
+            <td>
+              <button class="btn btn--small btn--primary" type="submit">Add</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+
+    <!-- Existing Saved Templates -->
+    <table class="meals-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Calories</th>
+      <th>Protein</th>
+      <th>Carbs</th>
+      <th>Fat</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="saved-meals-list">
+    {{#each savedMeals}}
+    <tr data-id="{{this._id}}">
+      <td>
+        <input
+          class="saved-input"
+          data-field="name"
+          type="text"
+          value="{{this.name}}"
+          readonly
+        />
+      </td>
+      <td>
+        <input
+          class="saved-input"
+          data-field="calories"
+          type="number"
+          value="{{this.calories}}"
+          readonly
+        />
+      </td>
+      <td>
+        <input
+          class="saved-input"
+          data-field="protein"
+          type="number"
+          value="{{this.protein}}"
+          readonly
+        />
+      </td>
+      <td>
+        <input
+          class="saved-input"
+          data-field="carbs"
+          type="number"
+          value="{{this.carbs}}"
+          readonly
+        />
+      </td>
+      <td>
+        <input
+          class="saved-input"
+          data-field="fat"
+          type="number"
+          value="{{this.fat}}"
+          readonly
+        />
+      </td>
+      <td class="meals-table__actions">
+        <!-- + Add back into daily -->
+        <form action="/meals/add" method="POST" class="log-saved-form" style="display:inline;">
+          <input type="hidden" name="filterDate" value="{{../selectedISODate}}" />
+          <input type="hidden" name="entryDate"  value="{{../selectedISODate}}" />
+          <input type="hidden" name="name"     value="{{this.name}}"     />
+          <input type="hidden" name="calories" value="{{this.calories}}" />
+          <input type="hidden" name="protein"  value="{{this.protein}}"  />
+          <input type="hidden" name="carbs"    value="{{this.carbs}}"    />
+          <input type="hidden" name="fat"      value="{{this.fat}}"      />
+          <button type="submit" class="btn btn--small btn--primary">+ Add</button>
         </form>
 
-        <!-- Existing Saved Templates -->
-        <table class="meals-table">
-          <thead>
-            <tr>
-              <th>Name</th><th>Calories</th><th>Protein</th>
-              <th>Carbs</th><th>Fats</th><th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="saved-meals-list">
-  {{#each savedMeals}}
-  <tr data-id="{{this._id}}">
-    <td>{{this.name}}</td>
-    <td>{{this.calories}}</td>
-    <td>{{this.protein}}</td>
-    <td>{{this.carbs}}</td>
-    <td>{{this.fat}}</td>
-    <td class="meals-table__actions">
-      <!-- Add to Logged Meals button -->
-      <form action="/meals/add" method="POST" class="log-saved-form" style="display:inline;">
-        <!-- keep the view’s date in sync -->
-        <input type="hidden" name="filterDate" value="{{../selectedISODate}}" />
-        <input type="hidden" name="entryDate"  value="{{../selectedISODate}}" />
-        <!-- payload for new log entry -->
-        <input type="hidden" name="name"     value="{{this.name}}"     />
-        <input type="hidden" name="calories" value="{{this.calories}}" />
-        <input type="hidden" name="protein"  value="{{this.protein}}"  />
-        <input type="hidden" name="carbs"    value="{{this.carbs}}"    />
-        <input type="hidden" name="fat"      value="{{this.fat}}"      />
-        <button type="submit" class="btn btn--small btn--primary">
-          + Add
-        </button>
-      </form>
+        <!-- inline‑edit controls -->
+          <button type="button" class="btn btn--small btn-toggle-saved">Edit</button>
+          <button type="button" class="btn btn--small btn-save-saved" hidden>Save</button>
+          <!-- delete template -->
+        <form action="/meals/saved/{{this._id}}/delete" method="POST" style="display:inline;">
+          <input type="hidden" name="filterDate" value="{{../selectedISODate}}" />
+          <button type="submit" class="btn btn--small btn-delete">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
 
-      <!-- existing Edit / Delete buttons… -->
-      <button type="button" class="btn btn--small btn-edit-saved">Edit</button>
-      <form action="/meals/saved/{{this._id}}/delete" method="POST" style="display:inline;">
-        <button type="submit" class="btn btn--small btn-delete">Delete</button>
-      </form>
-    </td>
-  </tr>
-  {{/each}}
-</tbody>
-        </table>
-      </section>
-    </div>
+  </section>
+</div>
+
   </div>
 </main>
 
-<script src="/js/meal-edit.js" defer></script>
+<script src="/public/js/meal-edit.js" defer></script>
