@@ -3,6 +3,8 @@ import { getAllWorkouts, getWorkoutById } from '../data/workouts.js';
 import { createEntry, getEntriesByUser } from '../data/calendarEntries.js';
 import { getMealsByUser } from '../data/meals.js';
 import { users } from '../config/mongoCollections.js';
+import xss from 'xss';
+
 
 const router = Router();
 
@@ -176,16 +178,19 @@ router.post('/comment', async (req, res) => {
   }
 
   try {
+    const sanitizedComment = xss(comment);
     const userCollection = await users();
     await userCollection.updateOne(
       { userId },
-      { $push: { comments: { date, comment, createdAt: new Date() } } }
+      { $push: { comments: { date, comment: sanitizedComment, createdAt: new Date() } } }
     );
     return res.json({ comment });
   } catch (err) {
     return res.status(500).json({ error: 'Failed to save comment', details: err.toString() });
   }
 });
+
+
 
 router.get('/comments', async (req, res) => {
   if (!req.session.user) {

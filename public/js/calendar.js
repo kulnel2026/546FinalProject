@@ -7,6 +7,11 @@ const today        = new Date();
 const currentMonth = today.getMonth();
 const currentYear  = today.getFullYear();
 
+
+function sanitizeComment(inputComment) {
+  return filterXSS(inputComment);
+}
+
 // Populate month selector
 for (let m = 0; m < 12; m++) {
   const opt = document.createElement('option');
@@ -111,7 +116,7 @@ function renderDayCell(year, month, day) {
   .then(comments => {
     comments.forEach(c => {
       const li = document.createElement('li');
-      li.textContent = c;
+      li.textContent = c.comment;
       commentList.appendChild(li);
     });
   });
@@ -123,7 +128,13 @@ function renderDayCell(year, month, day) {
 
   const commentBtn = document.createElement('button');
   commentBtn.textContent = 'Add Comment';
-  commentBtn.onclick = () => addComment(dateKey, commentInput.value, commentList);
+  
+  commentBtn.onclick = () => {
+    const rawComment = commentInput.value;
+    const sanitizedComment = sanitizeComment(rawComment)
+    addComment(dateKey, sanitizedComment, commentList);
+  }  
+  
   commentSection.appendChild(commentBtn);
 
   cell.appendChild(commentSection);
