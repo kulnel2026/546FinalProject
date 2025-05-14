@@ -39,10 +39,8 @@ router.get('/', async (req, res, next) => {
     const mealMap  = {};
     for (const meal of allMeals) {
       const d = new Date(meal.date);
-      if (d >= start && d <= end) {
         const dateStr = d.toISOString().split('T')[0];
         mealMap[dateStr] = (mealMap[dateStr] || []).concat(meal.name);
-      }
     }
 
     // send both maps as JSON blobs for calendar.js
