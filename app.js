@@ -11,8 +11,6 @@ import workoutRoutes from './routes/workouts.js'
 import calendarRoutes from './routes/calendar.js'
 import statsRoutes from './routes/stats.js'
 import goalTrackerRoute from './routes/goalTracker.js';
-import calendarRoutes from './routes/calendar.js'
-import statsRoutes from './routes/stats.js'
 
 
 

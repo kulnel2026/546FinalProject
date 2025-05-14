@@ -16,7 +16,7 @@ export const createWorkout = async (username, group, time, exercises) => {
 
 
   for (let exercise of exercises){
-    if (typeof exerciseName != "string"){
+    if (typeof exercise.name != "string"){
       throw new Error('Exercise name has to be a string');
     }
 

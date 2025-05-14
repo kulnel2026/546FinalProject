@@ -6,7 +6,7 @@ const router = Router();
 router.get('/', async (req, res) => {
   const username = req.session.user.userId;
   const all = await getAllWorkouts(username.trim());
-  res.render('workoutDashboard', { workouts: all });
+  res.render('workoutDashboard', { workouts: all, loggedIn: true });
 });
 
 router.get('/list', async (req, res) => {
@@ -14,7 +14,7 @@ router.get('/list', async (req, res) => {
     const username = req.session.user.userId;
     const workouts = await getAllWorkouts(username.trim());
     const isDelete = req.query.action === 'delete';
-    res.render('workoutList', { workouts, isDelete });
+    res.render('workoutList', { workouts, isDelete, loggedIn: true });
   } catch (e) {
     res.status(500).send(e);
   }
@@ -26,7 +26,7 @@ router.get('/form', async (req, res) => {
     'Push', 'Pull', 'Legs', 'Chest', 'Triceps', 'Shoulders', 'Upper Back', 'Lats', 'Biceps', 'Forearms', 'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Core', 'Cardio'
   ];
 
-  res.render('workoutForm', {isEdit: false, groups: muscleGroups});
+  res.render('workoutForm', {isEdit: false, groups: muscleGroups, loggedIn: true});
 });
 
 router.get('/edit/:id', async (req, res) => {
@@ -37,7 +37,7 @@ router.get('/edit/:id', async (req, res) => {
     const muscleGroups = [
       'Push', 'Pull', 'Legs', 'Chest', 'Triceps', 'Shoulders', 'Upper Back', 'Lats', 'Biceps', 'Forearms', 'Quads', 'Hamstrings', 'Glutes', 'Calves', 'Core', 'Cardio'
     ];
-    res.render('workoutForm', { workout, isEdit: true, groups: muscleGroups});
+    res.render('workoutForm', { workout, isEdit: true, groups: muscleGroups, loggedIn: true});
   } catch (e) {
     res.status(500).send(e);
   }
@@ -65,8 +65,8 @@ router.post('/add', async (req, res) => {
 
 
     for (let exercise of exercises){
-
-      if (typeof exerciseName != "string"){
+      
+      if (typeof exercise.name != "string"){
         throw new Error('Exercise name has to be a string');
       }
 
