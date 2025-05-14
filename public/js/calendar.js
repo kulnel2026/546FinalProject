@@ -62,6 +62,9 @@ function renderDayCell(year, month, day) {
     cell.appendChild(ul);
   }
 
+
+  
+
   // Add Workout button
   const workoutBtn = document.createElement('button');
   workoutBtn.className   = 'add-workout-btn';
@@ -79,6 +82,51 @@ function renderDayCell(year, month, day) {
     window.location.href = `/meals?date=${dateKey}#add-meal-form`;
   };
   cell.appendChild(mealBtn);
+
+
+
+  // Reaction buttons (like, dislike)
+  const commentSection = document.createElement('div');
+
+  const likeBtn = document.createElement('button');
+  likeBtn.textContent = '👍 Like';
+  likeBtn.onclick = () => handleReaction(dateKey, 'like');
+  commentSection.appendChild(likeBtn);
+
+  const dislikeBtn = document.createElement('button');
+  dislikeBtn.textContent = '👎 Dislike';
+  dislikeBtn.onclick = () => handleReaction(dateKey, 'dislike');
+  commentSection.appendChild(dislikeBtn);
+
+
+  commentSection.className = 'comment-section';
+
+  const commentList = document.createElement('ul');
+  commentSection.appendChild(commentList);
+
+
+  // Display existing comments (if any)
+  fetch(`/calendar/comments?date=${dateKey}`)
+  .then(res => res.json())
+  .then(comments => {
+    comments.forEach(c => {
+      const li = document.createElement('li');
+      li.textContent = c;
+      commentList.appendChild(li);
+    });
+  });
+
+  const commentInput = document.createElement('input');
+  commentInput.type = 'text';
+  commentInput.placeholder = 'Add a comment...';
+  commentSection.appendChild(commentInput);
+
+  const commentBtn = document.createElement('button');
+  commentBtn.textContent = 'Add Comment';
+  commentBtn.onclick = () => addComment(dateKey, commentInput.value, commentList);
+  commentSection.appendChild(commentBtn);
+
+  cell.appendChild(commentSection);
 
   return cell;
 }
@@ -127,6 +175,38 @@ function generateCalendar() {
   } else if (v === 'day') {
     generateDayView(y, m, today.getDate());
   }
+}
+
+function handleReaction(dateKey, type) {
+  fetch('/calendar/reaction', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ date: dateKey, type })
+  }).then(res => {
+    if (res.ok) {
+      alert(`You ${type === 'like' ? 'liked' : 'disliked'} ${dateKey}`);
+    }
+  });
+}
+
+function addComment(dateKey, comment, listEl) {
+  if (!comment.trim()) return;
+
+  fetch('/calendar/comment', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ date: dateKey, comment })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const li = document.createElement('li');
+    li.textContent = data.comment;
+    listEl.appendChild(li);
+  });
 }
 
 // Event listeners

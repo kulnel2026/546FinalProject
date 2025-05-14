@@ -139,4 +139,76 @@ router.post('/assignWorkout', async (req, res) => {
   }
 });
 
+router.post('/reaction', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(403).json({ error: 'Not logged in' });
+  }
+
+  const { date, type } = req.body;
+  const userId = req.session.user.userId;
+
+  if (!date || !type) {
+    return res.status(400).json({ error: 'Missing date or reaction type' });
+  }
+
+  try {
+    const userCollection = await users();
+    await userCollection.updateOne(
+      { userId },
+      { $push: { reactions: { date, type, createdAt: new Date() } } }
+    );
+    return res.sendStatus(200);
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to save reaction', details: err.toString() });
+  }
+});
+
+router.post('/comment', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(403).json({ error: 'Not logged in' });
+  }
+
+  const { date, comment } = req.body;
+  const userId = req.session.user.userId;
+
+  if (!date || !comment) {
+    return res.status(400).json({ error: 'Missing date or comment' });
+  }
+
+  try {
+    const userCollection = await users();
+    await userCollection.updateOne(
+      { userId },
+      { $push: { comments: { date, comment, createdAt: new Date() } } }
+    );
+    return res.json({ comment });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to save comment', details: err.toString() });
+  }
+});
+
+router.get('/comments', async (req, res) => {
+  if (!req.session.user) {
+    return res.status(403).json({ error: 'Not logged in' });
+  }
+
+  const date = req.query.date;
+  const userId = req.session.user.userId;
+
+  if (!date) {
+    return res.status(400).json({ error: 'Missing date' });
+  }
+
+  try {
+    const userCollection = await users();
+    const user = await userCollection.findOne({ userId });
+    const comments = (user?.comments || []).filter(c => c.date === date);
+    return res.json(comments);
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to fetch comments', details: err.toString() });
+  }
+});
+
+
+
 export default router;
