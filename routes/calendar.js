@@ -3,6 +3,7 @@ import { getAllWorkouts, getWorkoutById } from '../data/workouts.js';
 import { createEntry, getEntriesByUser } from '../data/calendarEntries.js';
 import { getMealsByUser } from '../data/meals.js';
 import { users } from '../config/mongoCollections.js';
+import { getUserByUserId} from '../data/users.js';
 import xss from 'xss';
 
 
@@ -48,7 +49,8 @@ router.get('/', async (req, res, next) => {
       title:           'Your Calendar',
       loggedIn:        true,
       workoutMapJSON:  JSON.stringify(workoutMap),
-      mealMapJSON:     JSON.stringify(mealMap)
+      mealMapJSON:     JSON.stringify(mealMap),
+      sessionUserId: req.session.user.userId
     });
   } catch (e) {
     return res.status(500).render('error', {
@@ -80,6 +82,84 @@ router.get('/selectWorkout', async (req, res) => {
     });
   }
 });
+
+router.get('/search', async (req, res) => {
+
+  try {
+    const { username } = req.query;
+
+    if (!username || typeof username !== 'string') {
+      return res.status(400).render('error', {
+        title: 'Invalid Search',
+        error: 'You must enter a valid username.'
+      });
+    }
+    const user = await getUserByUserId(username.trim());
+    if (!user) {
+      // Load own calendar with error message
+      const userId = req.session.user.userId;
+      const entries = await getEntriesByUser(userId);
+      const workoutMap = {};
+      for (const entry of entries) {
+        const dateStr = entry.date.toISOString().split('T')[0];
+        const names = entry.workouts.map(w => w.name);
+        workoutMap[dateStr] = (workoutMap[dateStr] || []).concat(names);
+      }
+
+      const allMeals = await getMealsByUser(userId);
+      const mealMap = {};
+      for (const meal of allMeals) {
+        const d = new Date(meal.date);
+        const dateStr = d.toISOString().split('T')[0];
+        mealMap[dateStr] = (mealMap[dateStr] || []).concat(meal.name);
+      }
+
+      return res.render('calendar', {
+        title: 'Your Calendar',
+        loggedIn: true,
+        workoutMapJSON: JSON.stringify(workoutMap),
+        mealMapJSON: JSON.stringify(mealMap),
+        sessionUserId: userId,
+        errorMessage: `No user found with ID "${username}".`
+      });
+    }
+    const userId = user.userId;
+
+    // Get entries
+    const entries = await getEntriesByUser(userId);
+    const workoutMap = {};
+    for (const entry of entries) {
+      const dateStr = entry.date.toISOString().split('T')[0];
+      const names = entry.workouts.map(w => w.name);
+      workoutMap[dateStr] = (workoutMap[dateStr] || []).concat(names);
+    }
+
+    // Get meals
+    const allMeals = await getMealsByUser(userId);
+    const mealMap = {};
+    for (const meal of allMeals) {
+      const d = new Date(meal.date);
+      const dateStr = d.toISOString().split('T')[0];
+      mealMap[dateStr] = (mealMap[dateStr] || []).concat(meal.name);
+    }
+
+    return res.render('calendar', {
+      title: `Viewing ${userId}'s Calendar`,
+      loggedIn: true,
+      workoutMapJSON: JSON.stringify(workoutMap),
+      mealMapJSON: JSON.stringify(mealMap),
+      viewedUser: userId,
+      readOnly: true,
+      sessionUserId: req.session.user.userId
+    });
+  } catch (e) {
+    return res.status(500).render('error', {
+      title: 'Error',
+      error: e.toString()
+    });
+  }
+});
+
 
 // POST /calendar/assignWorkout → add workout entry
 router.post('/assignWorkout', async (req, res) => {
@@ -167,22 +247,22 @@ router.post('/comment', async (req, res) => {
   if (!req.session.user) {
     return res.status(403).json({ error: 'Not logged in' });
   }
+  //const userId = req.session.user.userId;
+  const { date, comment, userId } = req.body;
+  const author = req.session.user.userId;
 
-  const { date, comment } = req.body;
-  const userId = req.session.user.userId;
-
-  if (!date || !comment) {
+  if (!date || !comment || !userId ) {
     return res.status(400).json({ error: 'Missing date or comment' });
   }
 
   try {
     const sanitizedComment = xss(comment);
     const userCollection = await users();
-    await userCollection.updateOne(
+    await userCollection.updateOne( 
       { userId },
-      { $push: { comments: { date, comment: sanitizedComment, createdAt: new Date() } } }
+      { $push: { comments: { date, comment: sanitizedComment, author, createdAt: new Date() } } }
     );
-    return res.json({ comment });
+    return res.json({ comment: sanitizedComment, author, date: date });
   } catch (err) {
     return res.status(500).json({ error: 'Failed to save comment', details: err.toString() });
   }
@@ -196,7 +276,7 @@ router.get('/comments', async (req, res) => {
   }
 
   const date = req.query.date;
-  const userId = req.session.user.userId;
+  const targetUserId = req.query.userId || req.session.user.userId;
 
   if (!date) {
     return res.status(400).json({ error: 'Missing date' });
@@ -204,7 +284,7 @@ router.get('/comments', async (req, res) => {
 
   try {
     const userCollection = await users();
-    const user = await userCollection.findOne({ userId });
+    const user = await userCollection.findOne({ userId: targetUserId });
     const comments = (user?.comments || []).filter(c => c.date === date);
     return res.json(comments);
   } catch (err) {
