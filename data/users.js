@@ -160,3 +160,13 @@ export const login = async (userId, password) => {
     lastLogin
   };
 };
+
+export async function getUserByUserId(userId) {
+  if (!userId || typeof userId !== 'string') throw 'Invalid userId';
+
+  const userCollection = await users();
+  const user = await userCollection.findOne({ userId: userId.trim() });
+
+  if (!user) throw `User with ID "${userId}" not found`;
+  return user;
+}
