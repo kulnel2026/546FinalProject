@@ -9,6 +9,21 @@
   </select>
 </div>
 
+<form method="GET" action="/calendar/search" class="user-search-form">
+  <label for="searchUser">View another user's calendar:</label>
+  <input type="text" id="searchUser" name="username" placeholder="Enter username" required />
+  <button type="submit">Search</button>
+</form>
+
+{{#if viewedUser}}
+  <p>You are viewing <strong>{{viewedUser}}</strong>'s calendar.</p>
+{{/if}}
+{{#if errorMessage}}
+  <div class="error-message">{{errorMessage}}</div>
+  <p style="color: red;">{{errorMessage}}</p>
+  </div>
+{{/if}}
+
 <div class="calendar-controls">
   <label for="month">Month:</label>
   <select id="month"></select>
@@ -30,6 +45,9 @@
   // server‑rendered mealMapJSON and workoutMapJSON must be passed in when you call res.render()
   window.mealMap    = {{{mealMapJSON}}};
   window.workoutMap = {{{workoutMapJSON}}};
+  window.readOnly = {{#if readOnly}}true{{else}}false{{/if}};
+  window.viewedUser = {{#if viewedUser}}"{{viewedUser}}"{{else}}null{{/if}};        
+  window.sessionUserId = "{{sessionUserId}}"; 
 </script>
 
 
