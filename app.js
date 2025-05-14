@@ -91,7 +91,7 @@ app.use('/calendar', requireAuth, calendarRoutes);
 app.use('/stats', requireAuth, statsRoutes);
 app.use('/goals', goalTrackerRoute);
 
-
+//w
 
 function requireSignout(req, res, next) {
      if (!req.session.user) return res.redirect('/login');
