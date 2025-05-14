@@ -8,7 +8,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import Handlebars from 'handlebars';
 import workoutRoutes from './routes/workouts.js'
-import mealsRouter from './routes/mealTrackerRoutes.js';
+import calendarRoutes from './routes/calendar.js'
+import statsRoutes from './routes/stats.js'
 import goalTrackerRoute from './routes/goalTracker.js';
 import calendarRoutes from './routes/calendar.js'
 import statsRoutes from './routes/stats.js'
@@ -48,7 +49,7 @@ Handlebars.registerHelper('json', function (context) {
    
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+
 app.engine('handlebars', handlebarsInstance.engine);
 app.set('view engine', 'handlebars');
 
@@ -84,13 +85,14 @@ function requireAuth(req, res, next) {
      next();
 }
 app.use('/user', requireAuth);
-app.use('/meals', mealsRouter);
-
 
 app.use('/workouts', requireAuth, workoutRoutes);
 app.use('/calendar', requireAuth, calendarRoutes);
 app.use('/stats', requireAuth, statsRoutes);
+<<<<<<< HEAD
 
+=======
+>>>>>>> dfa56ee8c4d04208eb856b57d0c519cc6f8e3ff0
 app.use('/goals', goalTrackerRoute);
 
 
