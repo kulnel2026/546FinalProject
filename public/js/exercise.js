@@ -10,3 +10,16 @@ document.getElementById('add-exercise-btn').addEventListener('click', () => {
     `;
     container.appendChild(div);
   });
+
+
+document.querySelector('.workout-form')?.addEventListener('submit', (e) => {
+  const timeInput = document.querySelector('input[name="time"]');
+  const timeValue = timeInput.value.trim();
+  const timeRegex = /^\d+h(\s\d+min)?$/;
+
+  if (!timeRegex.test(timeValue)) {
+    e.preventDefault(); // stop form submission
+    alert("Invalid time format. Use format like '1h 15min' or '1h'");
+    timeInput.focus();
+  }
+});

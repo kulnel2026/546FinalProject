@@ -44,4 +44,10 @@
   </form>
 </div>
 
-<script src="../public/js/exercise.js"></script>
+{{#if unchanged}}
+  <script>
+    alert("No changes were made to the workout.");
+  </script>
+{{/if}}
+
+<script src="/public/js/exercise.js"></script>

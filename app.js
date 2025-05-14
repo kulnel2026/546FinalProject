@@ -8,6 +8,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import Handlebars from 'handlebars';
 import workoutRoutes from './routes/workouts.js'
+import calendarRoutes from './routes/calendar.js'
+import statsRoutes from './routes/stats.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,6 +82,10 @@ function requireAuth(req, res, next) {
 app.use('/user', requireAuth);
 
 app.use('/workouts', requireAuth, workoutRoutes);
+app.use('/calendar', requireAuth, calendarRoutes);
+app.use('/stats', requireAuth, statsRoutes);
+
+
 
 function requireSignout(req, res, next) {
      if (!req.session.user) return res.redirect('/login');

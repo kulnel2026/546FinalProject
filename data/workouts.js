@@ -44,9 +44,9 @@ export const updateWorkout = async (id, updatedFields) => {
   const workoutCollection = await workouts();
 
   const updateData = {};
-  if (updatedFields.username) updateData.username = updatedFields.username;
-  if (updatedFields.group) updateData.group = updatedFields.group;
-  if (updatedFields.time) updateData.time = updatedFields.time;
+  if (updatedFields.username) updateData.username = updatedFields.username.trim();
+  if (updatedFields.group) updateData.group = updatedFields.group.trim();
+  if (updatedFields.time) updateData.time = updatedFields.time.trim();
   if (Array.isArray(updatedFields.exercises)) updateData.exercises = updatedFields.exercises;
 
   const updateInfo = await workoutCollection.updateOne(
@@ -54,7 +54,7 @@ export const updateWorkout = async (id, updatedFields) => {
     { $set: updateData }
   );
 
-  if (updateInfo.modifiedCount === 0) throw 'Workout update failed';
+  if (updateInfo.modifiedCount === 0) throw 'No changes made';
 
   return await getWorkoutById(id);
 
