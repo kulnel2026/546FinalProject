@@ -7,14 +7,15 @@ export const getWorkoutStatsForUser = async (userId) => {
 
   const today = new Date();
   today.setUTCHours(0,0,0,0);
+  today.setDate(today.getDate() - 1);
 
   const stats = {
-    daily: 0,
-    monthly: 0,
-    yearly: 0,
-    total: 0,
-    groupCount: {},
-    groupTimeline: {} // group -> [{date, totalWeight}]
+    groupStats: {
+      daily: {},
+      monthly: {},
+      yearly: {}
+    },
+    groupStats: {}
   };
 
   for (const entry of userEntries) {
@@ -29,40 +30,37 @@ export const getWorkoutStatsForUser = async (userId) => {
     const isSameYear = entryDate.getUTCFullYear() === today.getUTCFullYear();
 
 
-    console.log(entry.group);
-    console.log(entryDate.getUTCDay());
-    console.log(today.getUTCDay());
 
     if (isToday) stats.daily++;
     if (isSameMonth) stats.monthly++;
     if (isSameYear) stats.yearly++;
-
     if (Array.isArray(entry.workouts)) {
       stats.total += entry.workouts.length;
-
+    
       for (const workout of entry.workouts) {
+
+
         const group = workout.group?.trim();
-        const weight = Number(workout.weight) || 0;
 
         if (!group) continue;
 
-        stats.groupCount[group] = (stats.groupCount[group] || 0) + 1;
-
-        // Group timeline (for progress over time)
-        if (!stats.groupTimeline[group]) stats.groupTimeline[group] = {};
-        if (!stats.groupTimeline[group][dateStr]) stats.groupTimeline[group][dateStr] = 0;
-
-        stats.groupTimeline[group][dateStr] += weight;
+        if (isToday) {
+          stats.groupStats.daily[group] = (stats.groupStats.daily[group] || 0) + 1;
+        }
+        if (isSameMonth) {
+          stats.groupStats.monthly[group] = (stats.groupStats.monthly[group] || 0) + 1;
+        }
+        if (isSameYear) {
+          stats.groupStats.yearly[group] = (stats.groupStats.yearly[group] || 0) + 1;
+        }
       }
     }
+
+    console.log(stats.groupStats);
   }
 
   // Convert timeline objects to arrays for Chart.js
-  for (const group in stats.groupTimeline) {
-    stats.groupTimeline[group] = Object.entries(stats.groupTimeline[group])
-      .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
-      .map(([date, totalWeight]) => ({ date, totalWeight }));
-  }
+  
 
   return stats;
 };
