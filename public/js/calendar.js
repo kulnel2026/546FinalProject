@@ -69,7 +69,7 @@ function renderDayCell(year, month, day) {
 
 
   
-
+if(!window.readOnly){
   // Add Workout button
   const workoutBtn = document.createElement('button');
   workoutBtn.className   = 'add-workout-btn';
@@ -88,7 +88,7 @@ function renderDayCell(year, month, day) {
   };
   cell.appendChild(mealBtn);
 
-
+}
 
   // Reaction buttons (like, dislike)
   const commentSection = document.createElement('div');
@@ -111,12 +111,13 @@ function renderDayCell(year, month, day) {
 
 
   // Display existing comments (if any)
-  fetch(`/calendar/comments?date=${dateKey}`)
+  const commentOwner = window.viewedUser || window.sessionUserId;
+  fetch(`/calendar/comments?date=${encodeURIComponent(dateKey)}&userId=${encodeURIComponent(commentOwner)}`)
   .then(res => res.json())
   .then(comments => {
     comments.forEach(c => {
       const li = document.createElement('li');
-      li.textContent = c.comment;
+      li.textContent = c.author ? `${c.author}: ${c.comment}` : c.comment;
       commentList.appendChild(li);
     });
   });
@@ -210,12 +211,12 @@ function addComment(dateKey, comment, listEl) {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ date: dateKey, comment })
+    body: JSON.stringify({ date: dateKey, comment, userId: window.viewedUser || window.sessionUserId })
   })
   .then(res => res.json())
   .then(data => {
     const li = document.createElement('li');
-    li.textContent = data.comment;
+    li.textContent = `${data.author}: ${data.comment}`;
     listEl.appendChild(li);
   });
 }
