@@ -23,7 +23,7 @@
     {{#if workouts.length}}
       <ul>
         {{#each workouts}}
-          <li>{{this.name}} – {{this.date}}</li>
+          <li>{{this.group}} - {{this.date}}</li>
         {{/each}}
       </ul>
     {{else}}
@@ -32,14 +32,22 @@
   </section>
 
   <section class="profile-section">
-    <h3>Edit Workout Splits</h3>
+    <h3>Currently Saved Workout Splits</h3>
     {{#if splits.length}}
       <div class="split-buttons">
-        {{#each splits}}
-          <button onclick="location.href='/profile/splits/{{@index}}/edit'">
-            {{this}}
-          </button>
-        {{/each}}
+        <ul>
+          {{#each splits}}
+            <li>
+              <strong>Group:</strong> {{this.group}}<br>
+              <strong>Exercises:</strong>
+              <ul>
+                {{#each this.exercises}}
+                  <li>{{this}}</li>
+                {{/each}}
+              </ul>
+            </li>
+          {{/each}}
+        </ul>
       </div>
     {{else}}
       <p><em>No splits defined.</em></p>

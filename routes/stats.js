@@ -12,7 +12,8 @@ router.get('/', async (req, res) => {
 
     res.render('stats', {
       title: 'Your Workout Stats',
-      workoutStats
+      workoutStats,
+      loggedIn: true
     });
   } catch (e) {
     res.status(500).render('error', { message: e });

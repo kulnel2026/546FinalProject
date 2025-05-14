@@ -1,5 +1,8 @@
 import {Router} from 'express';
+import { users } from '../config/mongoCollections.js';
 import { register, login } from '../data/users.js';
+import { createWorkout, getAllWorkouts, getWorkoutById, deleteWorkoutById, updateWorkout } from '../data/workouts.js';
+import { workouts } from '../config/mongoCollections.js';
 const router = Router();
 
 router.route('/').get(async (req, res) => {
@@ -108,21 +111,39 @@ router.route('/user').get(async (req, res) => {
     });
 });
 
-router.get('/profile', (req, res) => {
+router.get('/profile', async (req, res) => {
   if (!req.session.user) {
     return res.redirect('/login');
   }
 
   const user = req.session.user;
+
+  const userId = user.userId;
+  const userCollection = await users();
+  const userFromDb = await userCollection.findOne({ userId });
+
   const createdDate = new Date(user.signupDate).toLocaleDateString();
+
+
+  let workoutSplits = [];
+
+  try {
+    const allWorkouts = await getAllWorkouts(userId);
+    workoutSplits = allWorkouts.map(w => ({
+      group: w.group || 'Unnamed Group',
+      exercises: w.exercises.map(ex => ex.name)
+    }));
+  } catch (e) {
+    console.error('Failed to load workout splits:', e);
+  }
 
   res.render('profile', {
     title: 'User Profile',
     username: user.userId,
     createdDate,
     goals: user.goals || [],
-    workouts: user.workouts || [],
-    splits: user.splits || []
+    workouts: userFromDb.workoutHistory || [],
+    splits: workoutSplits
   });
 });
 

@@ -139,7 +139,7 @@ router.post('/edit/:id', async (req, res) => {
       });
     }
 
-    res.status(400).send(e);
+    res.status(500).render('error', { message: e });
   }
 });
 

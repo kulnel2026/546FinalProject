@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { getAllWorkouts, getWorkoutById } from '../data/workouts.js';
 import { createEntry, getEntriesByUser } from '../data/calendarEntries.js';
 import { getMealsByUser } from '../data/meals.js';
+import { users } from '../config/mongoCollections.js';
 
 const router = Router();
 
@@ -104,6 +105,7 @@ router.post('/assignWorkout', async (req, res) => {
   }
   try {
     const workout = await getWorkoutById(workoutId);
+    const workoutGroup = workout.group?.trim() || "";
     if (!workout || !Array.isArray(workout.exercises)) {
       return res.status(404).render('error', {
         title: 'Workout Not Found',
@@ -118,6 +120,16 @@ router.post('/assignWorkout', async (req, res) => {
       group:  workout.group?.trim()
     }));
     await createEntry(userId, date.trim(), formatted, []);
+
+    const userCollection = await users();
+    const updateResult = await userCollection.updateOne(
+      { userId: userId },
+      { $push: {workoutHistory: {group: workoutGroup, date: date.trim()}}}
+    );
+
+
+
+
     return res.redirect('/calendar');
   } catch (err) {
     return res.status(500).render('error', {
