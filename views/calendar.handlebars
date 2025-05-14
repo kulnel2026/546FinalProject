@@ -25,7 +25,10 @@
 </div>
 
 <script>
-  const workoutMap = {{{asJSON workoutMap}}};
+  // server‑rendered mealMapJSON and workoutMapJSON must be passed in when you call res.render()
+  window.mealMap    = {{{mealMapJSON}}};
+  window.workoutMap = {{{workoutMapJSON}}};
 </script>
+
 
 <script src="/public/js/calendar.js" defer></script>
