@@ -9,13 +9,18 @@
 
   <section class="profile-section">
     <h3>Goals</h3>
-    {{#if goals.length}}
-      <ul>
-        {{#each goals}}<li>{{this}}</li>{{/each}}
-      </ul>
-    {{else}}
-      <p><em>No goals yet.</em></p>
-    {{/if}}
+    {{#if goals}}
+  <ul>
+    <li>Calories: {{goals.calorieGoal}}</li>
+    <li>Protein: {{goals.proteinGoal}}</li>
+    <li>Carbs: {{goals.carbsGoal}}</li>
+    <li>Fat: {{goals.fatGoal}}</li>
+    <li>Weight: {{goals.weight}} lbs</li>
+    <li>Height: {{goals.height}} inches</li>
+  </ul>
+{{else}}
+  <p>No macro goals set yet.</p>
+{{/if}}
   </section>
 
   <section class="profile-section">
