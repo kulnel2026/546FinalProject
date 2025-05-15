@@ -4,7 +4,7 @@ export const Errors = {
     lastName_invalid: 'lastName must be 2–20 letters with no spaces or numbers',
     userId_invalid: 'userId must be 5-10 characters, letters and numbers only',
     password_type: 'password must be a string with no spaces',
-    password_invalid: 'password must be ≥8 chars, include an uppercase letter, a number, and a special character',
+    password_invalid: 'password must be ≥8 chars, include an uppercase letter, and a number',
     favoriteQuote_invalid: 'favoriteQuote must be 20–255 characters long',
     themePref_type: 'themePreference must be an object',
     themePref_keys: 'themePreference must have exactly backgroundColor and fontColor',
