@@ -1,5 +1,22 @@
 <main class="page-content">
   <section class="hero">
+    {{#if loggedIn}}
+  <div class="theme-selector">
+    <form method="POST" action="/set-theme">
+    <fieldset>
+      <legend>Select a Theme Color</legend>
+      <label for="themeColor">Choose Theme Color:</label>
+      <select id="themeColor" name="themeColor">
+        <option value="#cbe7a5" {{#ifEquals themeColor "#cbe7a5"}}selected{{/ifEquals}}>Default</option>
+        <option value="#dceeff" {{#ifEquals themeColor "#dceeff"}}selected{{/ifEquals}}>Soft Blue</option>
+        <option value="#fff9db" {{#ifEquals themeColor "#fff9db"}}selected{{/ifEquals}}>Pale Yellow</option>
+        <option value="#ffe5d9" {{#ifEquals themeColor "#ffe5d9"}}selected{{/ifEquals}}>Peach Blush</option>
+      </select>
+      <button type="submit">Apply</button>
+      </fieldset>
+    </form>
+  </div>
+{{/if}}
     <h1 class="hero__title">Macro Motion</h1>
     <p class="hero__tagline">EAT. LIFT. REPEAT.</p>
   </section>
