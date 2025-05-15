@@ -32,6 +32,9 @@ const handlebarsInstance = exphbs.create({
    
          return new Handlebars.SafeString(JSON.stringify(obj));
        },
+       ifEquals: function (a, b, options) {
+        return a === b ? options.fn(this) : options.inverse(this);
+      },
    
        partialsDir: ['views/partials/']
      }
@@ -52,7 +55,7 @@ app.engine('handlebars', handlebarsInstance.engine);
 app.set('view engine', 'handlebars');
 
 app.use(session({
-     nname: "AuthCookie",
+     name: "AuthCookie",
      secret: "This is SHER-LOCKED",
      saveUninitialized: true,
      resave: false,
@@ -82,6 +85,10 @@ function requireAuth(req, res, next) {
      if (!req.session.user) return res.redirect('/login');
      next();
 }
+app.use((req, res, next) => {
+  res.locals.themeColor = req.session.themeColor || '#cbe7a5'; // Default color
+  next();
+  });
 app.use('/user', requireAuth);
 
 app.use('/workouts', requireAuth, workoutRoutes);
@@ -145,6 +152,7 @@ app.use((req, res, next) => {
     res.locals.loggedIn = Boolean(req.session.user);
     next();
   });
+
 
    // Mount routes and start server
 configRoutes(app);
