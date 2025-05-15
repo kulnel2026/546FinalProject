@@ -168,4 +168,18 @@ router.route('/signout').get((req, res, next) => {
   });
 });
 
+router.post('/set-theme', async (req, res) => {
+  const { themeColor } = req.body;
+
+  const allowedColors = ['#cbe7a5', '#dceeff', '#fff9db', '#ffe5d9']; // approved light themes
+  if (allowedColors.includes(themeColor)) {
+    req.session.themeColor = themeColor;
+  } else {
+    req.session.themeColor = '#cbe7a5'; // fallback to default
+  }
+
+  return res.redirect('/'); // redirect to home after setting
+});
+
+
 export default router;
