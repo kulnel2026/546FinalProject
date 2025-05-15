@@ -3,6 +3,8 @@ import { users } from '../config/mongoCollections.js';
 import { register, login } from '../data/users.js';
 import { createWorkout, getAllWorkouts, getWorkoutById, deleteWorkoutById, updateWorkout } from '../data/workouts.js';
 import { workouts } from '../config/mongoCollections.js';
+import { goalTracker } from '../config/mongoCollections.js'; 
+
 const router = Router();
 
 router.route('/').get(async (req, res) => {
@@ -117,16 +119,14 @@ router.get('/profile', async (req, res) => {
   }
 
   const user = req.session.user;
-
   const userId = user.userId;
   const userCollection = await users();
   const userFromDb = await userCollection.findOne({ userId });
 
   const createdDate = new Date(user.signupDate).toLocaleDateString();
 
-
+  
   let workoutSplits = [];
-
   try {
     const allWorkouts = await getAllWorkouts(userId);
     workoutSplits = allWorkouts.map(w => ({
@@ -137,11 +137,22 @@ router.get('/profile', async (req, res) => {
     console.error('Failed to load workout splits:', e);
   }
 
+  let latestGoals = null;
+  try {
+    const goalCollection = await goalTracker();
+    latestGoals = await goalCollection.findOne(
+      { userId },
+      { sort: { _id: -1 } } // Get the most recent one
+    );
+  } catch (e) {
+    console.error('Failed to fetch goals:', e);
+  }
+
   res.render('profile', {
     title: 'User Profile',
     username: user.userId,
     createdDate,
-    goals: user.goals || [],
+    goals: latestGoals || null, // Send the latest goal object
     workouts: userFromDb.workoutHistory || [],
     splits: workoutSplits
   });
